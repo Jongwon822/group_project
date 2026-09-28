@@ -1,122 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:group_project/screen/home_screen.dart';
+import 'package:group_project/data/announcement.dart';
+import 'package:group_project/screen/main_navigationbar.dart';
+
+/* 미리 만들어둔 기능!!
+홈화면 상단 앱바
+홈화면 상단 탭바 (추천 공고 / 추천 자격증)
+  ㄴ 추천공고의 경우 가로 스크롤이 가능한 listview 박스까지 구현함 (저장된 추천 공고를 불러오기까지 가능)
+
+홈화면 중단
+홈화면 하단 네비게이션바 (홈 / 달력 / 설정)
+
+
+
+
+ */
+
 
 void main() {
-  runApp(const MyApp());
+
+  // 내가 기록한 분야정보 불러오기
+  // 나의 달력에 기록된 정보 불러오기
+  // 설정 값 불러오기
+
+  // 추천 공고 저장된 파일 불러오기
+  final List<Announcement> ancList = [
+    Announcement(title: '삼성전자 상반기 채용 공고', period: '3.15~3.17', target: '소프트웨어 직군'),
+    Announcement(title: '하이닉스 상반기 채용 공고', period: '3.15~3.17', target: '전자정보 직군'),
+    Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
+  ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
+
+  runApp(MyApp(ancList: ancList));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// 임시로 일단 하단 네비게이션바를 메인으로 해두긴했는데
+// 로그인창을 만들어야 해서 home: (대충 로그인정보를 저장해둔 파일 검사하는 함수)
+// 1. 로그인 정보가 저장 안되어 있는 경우 -> LoginScreen()
+// 2. 로그인 정보가 저장 되어 있는 경우 -> HomeScreen()
+// 이런 식으로 하면 될듯?
 
-  // This widget is the root of your application.
+class MyApp extends StatelessWidget {
+
+  final List<Announcement> ancList;
+  const MyApp({super.key, required this.ancList});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '우리가 만든 앱',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: Colors.white,
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+      home: MainNavigationScreen(ancList: ancList), // 수정 필요함!!
     );
   }
 }
