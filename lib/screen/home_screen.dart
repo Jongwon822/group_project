@@ -190,7 +190,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           // 상단 타이틀 영역 (추천 취업 공고 / 자세히 보기)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
