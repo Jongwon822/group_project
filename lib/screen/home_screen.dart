@@ -154,9 +154,8 @@ class HomeScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               if (ancList == null || ancList.isEmpty) {
                 return Container(
-                  width: MediaQuery.of(context).size.width - 32,
+                  width: MediaQuery.of(context).size.width,
                   height: 155,
-                  margin: const EdgeInsets.only(right: 14, bottom: 8),
                   alignment: Alignment.center,
                   child: Text('추천 공고 없음', style: TextStyle(color: Colors.grey)),
                 );

@@ -13,8 +13,6 @@ import 'package:group_project/screen/main_navigation.dart';
 홈화면 하단 네비게이션바 (홈 / 달력 / 설정)
 
 
-
-
  */
 
 
