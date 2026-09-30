@@ -5,7 +5,7 @@ import 'package:group_project/data/announcement.dart';
 // 로그인창 이외의 공간에서 계속 하단에 적용 될 BottomNavigationBar
 
 class MainNavigationScreen extends StatefulWidget {
-  final List<Announcement> ancList;
+  final List<Announcement>? ancList;
   const MainNavigationScreen({super.key, required this.ancList});
 
   @override

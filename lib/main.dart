@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/screen/home_screen.dart';
 import 'package:group_project/data/announcement.dart';
-import 'package:group_project/screen/main_navigationbar.dart';
+import 'package:group_project/screen/main_navigation.dart';
+
 
 /* 미리 만들어둔 기능!!
 홈화면 상단 앱바
@@ -24,10 +25,10 @@ void main() {
   // 설정 값 불러오기
 
   // 추천 공고 저장된 파일 불러오기
-  final List<Announcement> ancList = [
-    Announcement(title: '삼성전자 상반기 채용 공고', period: '3.15~3.17', target: '소프트웨어 직군'),
-    Announcement(title: '하이닉스 상반기 채용 공고', period: '3.15~3.17', target: '전자정보 직군'),
-    Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
+  final List<Announcement>? ancList = [
+    //Announcement(title: '삼성전자 상반기 채용 공고', period: '3.15~3.17', target: '소프트웨어 직군'),
+    //Announcement(title: '하이닉스 상반기 채용 공고', period: '3.15~3.17', target: '전자정보 직군'),
+    //Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
   ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
 
   runApp(MyApp(ancList: ancList));
@@ -41,7 +42,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
 
-  final List<Announcement> ancList;
+  final List<Announcement>? ancList;
   const MyApp({super.key, required this.ancList});
 
   @override
@@ -54,6 +55,15 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: MainNavigationScreen(ancList: ancList), // 수정 필요함!!
+    );
+  }
+
+
+  //
+  void _onLoginSuccess(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => HomeScreen(ancList: ancList)),
+          (route) => false, // 이전 모든 화면 스택 삭제
     );
   }
 }
