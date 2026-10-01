@@ -4,7 +4,7 @@
 class userData {
   final String id;
   final String password;
-  final bool isLogged;
+  bool isLogged;
   final String name;
 
   final List<String>? jobCategory;
@@ -14,7 +14,7 @@ class userData {
   userData({
     required this.id,
     required this.password,
-    required this.isLogged,
+    this.isLogged = false,
     required this.name,
     this.jobCategory,
   });
