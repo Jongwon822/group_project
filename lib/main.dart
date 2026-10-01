@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/screen/home_screen.dart';
 import 'package:group_project/data/announcement.dart';
+import 'package:group_project/screen/login_screen.dart';
 import 'package:group_project/screen/main_navigation.dart';
 
 
@@ -29,7 +30,9 @@ void main() {
     //Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
   ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
 
-  runApp(MyApp(ancList: ancList));
+  final bool isLogged = true; // 임시로 true로 해뒀음
+
+  runApp(MyApp(ancList: ancList, isLogged: isLogged));
 }
 
 // 임시로 일단 하단 네비게이션바를 메인으로 해두긴했는데
@@ -41,7 +44,8 @@ void main() {
 class MyApp extends StatelessWidget {
 
   final List<Announcement>? ancList;
-  const MyApp({super.key, required this.ancList});
+  final bool isLogged;
+  const MyApp({super.key, required this.ancList, required this.isLogged});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +56,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),
-      home: MainNavigationScreen(ancList: ancList), // 수정 필요함!!
+      home: isLogged ? MainNavigationScreen(ancList: ancList) : LoginScreen(), // 수정 필요함!!
     );
   }
 
@@ -61,7 +65,7 @@ class MyApp extends StatelessWidget {
   void _onLoginSuccess(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => HomeScreen(ancList: ancList)),
-          (route) => false, // 이전 모든 화면 스택 삭제
+          (route) => false, // 이전 모든 화면 삭제
     );
   }
 }
