@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
               alignment: Alignment.center,
               child: Column(
                 children: [
-                  SizedBox(height: 70),
+                  const SizedBox(height: 70),
                   const Text(
                     '앱 이름',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     '로그인',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 50),
+                  const SizedBox(height: 50),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     width: 300,
@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     width: 300,
@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 5,),
+                  const SizedBox(height: 5,),
 
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
 
                   SizedBox(
                     width: 300,
@@ -109,9 +109,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         '계속',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -154,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 13,
                         width: 1,
                         color: Colors.grey,
-                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
                       ),
 
                       Expanded(

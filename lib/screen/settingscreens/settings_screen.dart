@@ -25,17 +25,17 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             children: [
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               CircleAvatar(
                 radius: 30,
-                backgroundColor: Color(0xFFE4EEFF),
-                foregroundColor: Color(0xFF1F5ADD),
+                backgroundColor: const Color(0xFFE4EEFF),
+                foregroundColor: const Color(0xFF1F5ADD),
                 child: Text(
                   widget.ud.id,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
 
