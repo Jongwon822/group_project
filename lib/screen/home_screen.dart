@@ -132,6 +132,7 @@ class HomeScreen extends StatelessWidget {
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
                   padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 모바일 최소 터치영역(48px) 때문에 높이 넘치는 것 방지
                 ),
                 child: const Text(
                   "자세히 보기",
