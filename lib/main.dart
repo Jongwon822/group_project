@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/home_screen.dart';
 import 'package:group_project/data/announcement.dart';
 import 'package:group_project/screen/login_screen.dart';
@@ -30,9 +31,10 @@ void main() {
     //Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
   ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
 
-  final bool isLogged = true; // 임시로 true로 해뒀음
+  // 임시로 false로 해뒀음
+  userData ud = userData(id: '이종원', password: '040415', name: '이종원', isLogged: false);
 
-  runApp(MyApp(ancList: ancList, isLogged: isLogged));
+  runApp(MyApp(ancList: ancList, ud: ud));
 }
 
 // 임시로 일단 하단 네비게이션바를 메인으로 해두긴했는데
@@ -44,8 +46,9 @@ void main() {
 class MyApp extends StatelessWidget {
 
   final List<Announcement>? ancList;
-  final bool isLogged;
-  const MyApp({super.key, required this.ancList, required this.isLogged});
+  final userData ud;
+
+  const MyApp({super.key, required this.ancList, required this.ud});
 
   @override
   Widget build(BuildContext context) {
@@ -56,16 +59,10 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
       ),
-      home: isLogged ? MainNavigationScreen(ancList: ancList) : LoginScreen(), // 수정 필요함!!
+      home: ud.isLogged ? MainNavigationScreen(ancList: ancList, ud: ud) : LoginScreen(ud: ud), // 수정 필요함!!
     );
   }
 
 
-  //
-  void _onLoginSuccess(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => HomeScreen(ancList: ancList)),
-          (route) => false, // 이전 모든 화면 삭제
-    );
-  }
+
 }
