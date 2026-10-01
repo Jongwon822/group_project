@@ -4,4 +4,6 @@ class Announcement {
   final String target;
 
   Announcement({required this.title, required this.period, required this.target});
+
+
 }
