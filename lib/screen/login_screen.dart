@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:group_project/data/announcement.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/main_navigation.dart';
+import 'package:group_project/screen/register.dart';
 
 class LoginScreen extends StatefulWidget {
-
   final userData ud;
   final List<Announcement>? ancList;
 
@@ -15,8 +15,20 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // widget.ud.isLogged의 기본값은 false임
 
-  bool autoLogin = false; // 로그인 화면에서는 자동로그인이 기본적으로 풀려있음
+
+  // TextField()에 적힌 값을 사용하기 위한 컨트롤러 생성
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+
+  // 사용이 끝난 컨트롤러는 dispose()
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +60,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey),
                     ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        hintText: '이메일을 입력하세요.',
+                    child: TextField(
+                      controller: _email,
+                      decoration: const InputDecoration(
+                        hintText: '이메일을 입력하세요',
                         border: InputBorder.none,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     width: 300,
@@ -64,36 +77,37 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey),
                     ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        hintText: '비밀번호를 입력하세요.',
+                    child: TextField(
+                      controller: _password,
+                      decoration: const InputDecoration(
+                        hintText: '비밀번호를 입력하세요',
                         border: InputBorder.none,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 5,),
-
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    width: 300,
+                    width: 354,
                     child: Row(
                       children: [
                         Checkbox(
-                          value: autoLogin,
+                          value: widget.ud.isLogged,
                           onChanged: (value) {
                             setState(() {
-                              autoLogin = value!;
+                              widget.ud.isLogged = value!;
                             });
                           },
                         ),
                         const Text('자동 로그인')
-
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 10,),
-
+                  const SizedBox(
+                    height: 10,
+                  ),
                   SizedBox(
                     width: 300,
                     height: 48,
@@ -119,9 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -132,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Spacer(),
                             TextButton(
                               onPressed: () {
-                                // 자세히 보기 눌렀을 때 작동하는거 navigation.push로 나중에 기입해줄것!!
+                                // 비밀번호 찾기 창 => 이메일, 이름을 입력하면 출력해줌
                               },
                               style: TextButton.styleFrom(
                                 minimumSize: Size.zero,
@@ -149,20 +161,24 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-
                       Container(
                         height: 13,
                         width: 1,
                         color: Colors.grey,
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                       ),
-
                       Expanded(
                         child: Row(
                           children: [
                             TextButton(
                               onPressed: () {
-                                // 자세히 보기 눌렀을 때 작동하는거 navigation.push로 나중에 기입해줄것!!
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        RegisterScreen(ud: widget.ud),
+                                  ),
+                                );
                               },
                               style: TextButton.styleFrom(
                                 minimumSize: Size.zero,
@@ -194,7 +210,11 @@ class _LoginScreenState extends State<LoginScreen> {
   // 로그인 완료 하면 작동할 함수
   void _loginSuccess(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => MainNavigationScreen(ancList: widget.ancList, ud: widget.ud,)),
+      MaterialPageRoute(
+          builder: (context) => MainNavigationScreen(
+                ancList: widget.ancList,
+                ud: widget.ud,
+              )),
       (route) => false, // 이전 모든 화면 삭제
     );
   }
