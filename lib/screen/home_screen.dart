@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/announcement.dart';
+import 'package:group_project/screen/editing_screen.dart';
+import 'package:group_project/screen/feddback_screen.dart';
 
 
 // 이거 높이 조정할 일 있으면 주의해서 바꿔줘
@@ -85,10 +87,17 @@ class HomeScreen extends StatelessWidget {
 
               // 첨삭지원 페이지 이동 박스
               _buildContentTile(
-                Icons.description_outlined,
-                '자소서·이력서 첨삭',
-                'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
-                '첨삭 시작하기',
+                  Icons.description_outlined,
+                  '자소서·이력서 첨삭',
+                  'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
+                  '첨삭 시작하기',
+                      () {
+                    Navigator.push(
+                      context, MaterialPageRoute(
+                      builder: (context) => const EditingScreen(),
+                    ),
+                    );
+                  }
               ),
 
               // 면접지원 페이지 이동 박스
@@ -97,6 +106,13 @@ class HomeScreen extends StatelessWidget {
                 '면접 예상 질문 & 피드백',
                 '지원하신 직무와 이력 정보를 분석해 예상 꼬리 질문을 생성하고, 답변에 대한 종합 모의 면접 평가 점수와 개선 피드백을 전달합니다.',
                 '면접 시작하기',
+                    () {
+                  Navigator.push(
+                    context, MaterialPageRoute(
+                    builder: (context) => const FeedbackScreen(),
+                  ),
+                  );
+                },
               ),
             ],
           ),
@@ -217,11 +233,12 @@ class HomeScreen extends StatelessWidget {
 
   // 첨삭하기랑 피드백하기 전용 위젯 만드는 함수
   Widget _buildContentTile(
-    IconData icon,
-    String title,
-    String content,
-    String buttonText,
-  ) {
+      IconData icon,
+      String title,
+      String content,
+      String buttonText,
+      VoidCallback onPressed,  //AI
+      ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -265,7 +282,7 @@ class HomeScreen extends StatelessWidget {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEEF2FF),
                 elevation: 0,
