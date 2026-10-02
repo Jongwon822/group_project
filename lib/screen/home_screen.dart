@@ -166,7 +166,7 @@ class HomeScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               if (ancList == null || ancList.isEmpty) {
                 return Container(
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery.of(context).size.width-32,
                   height: 155,
                   alignment: Alignment.center,
                   child: const Text('추천 공고 없음', style: TextStyle(color: Colors.grey)),
