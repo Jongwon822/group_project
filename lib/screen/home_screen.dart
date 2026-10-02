@@ -100,7 +100,7 @@ class HomeScreen extends StatelessWidget {
                   }
               ),
 
-              // 면접지원 페이지 이동 박스
+              // 면접지원 페이지 이동 박스.
               _buildContentTile(
                 Icons.help_outline,
                 '면접 예상 질문 & 피드백',
