@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
-import 'package:group_project/screen/main_navigation.dart';
 import 'package:group_project/screen/register.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
-  final userData ud;
+  final List<UserData> uds;
   final List<Announcement>? ancList;
+  final ValueChanged<String> login;
 
-  const LoginScreen({super.key, this.ancList, required this.ud});
+  const LoginScreen({super.key, this.ancList, required this.uds, required this.login});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // widget.ud.isLogged의 기본값은 false임
-
 
   // TextField()에 적힌 값을 사용하기 위한 컨트롤러 생성
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  bool autoLogin = false;
+  String errorMessage = '';
 
   // 사용이 끝난 컨트롤러는 dispose()
   @override
@@ -93,10 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Row(
                       children: [
                         Checkbox(
-                          value: widget.ud.isLogged,
+                          value: autoLogin,
                           onChanged: (value) {
                             setState(() {
-                              widget.ud.isLogged = value!;
+                              autoLogin = value!;
                             });
                           },
                         ),
@@ -112,8 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
+                        setState(() {
+                          errorMessage = _loginCheck();
+                        });
                         // 계속 누르면 작동할 함수
-                        _loginSuccess(context);
+                        if (_loginCheck()=='') {
+                          _savedAutoLogin(autoLogin); // 자동로그인 여부를 prefs에 저장
+                          widget.login(_email.text); // 로그인 성공한 ud로 메인 진입
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -171,13 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             TextButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        RegisterScreen(ud: widget.ud),
-                                  ),
-                                );
+                                _OpenRegister();
                               },
                               style: TextButton.styleFrom(
                                 minimumSize: Size.zero,
@@ -197,6 +198,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    child: Text(
+                      errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -206,15 +216,45 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // 로그인 완료 하면 작동할 함수
-  void _loginSuccess(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
+
+  // 회원가입 창 넘어갔다가 다시 돌아올 때 에러 메세지랑 입력 내용 지우는 함수
+  Future<void> _OpenRegister() async {
+    await Navigator.push(
+      context,
       MaterialPageRoute(
-          builder: (context) => MainNavigationScreen(
-                ancList: widget.ancList,
-                ud: widget.ud,
-              )),
-      (route) => false, // 이전 모든 화면 삭제
+        builder: (context) =>
+            RegisterScreen(uds: widget.uds),
+      ),
     );
+    if (mounted) {
+      setState(() {
+        errorMessage = '';
+        _email.clear();
+        _password.clear();
+      });
+    }
+  }
+
+  // 로그인 했을 때 autoLogin이 true라면
+  void _savedAutoLogin(bool autoLogin) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (autoLogin) {
+      prefs.setString('id', _email.text);
+      prefs.setBool('autoLogin', true);
+    }
+  }
+
+
+  String _loginCheck() {
+
+    UserData? ud = widget.uds.where((ud) => ud.id == _email.text).firstOrNull;
+
+    if (ud == null) {
+      return '이메일이 일치하지 않습니다.';
+    }
+    if (ud.password != _password.text) {
+      return '비밀번호가 일치하지 않습니다.';
+    }
+    return '';
   }
 }

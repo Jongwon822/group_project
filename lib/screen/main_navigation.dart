@@ -8,8 +8,9 @@ import 'package:group_project/screen/settingscreens/settings_screen.dart';
 class MainNavigationScreen extends StatefulWidget {
 
   final List<Announcement>? ancList;
-  final userData ud;
-  const MainNavigationScreen({super.key, required this.ancList, required this.ud});
+  final UserData ud;
+  final VoidCallback logout;
+  const MainNavigationScreen({super.key, required this.ancList, required this.ud, required this.logout});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -22,7 +23,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final List<Widget> _pages = [
     HomeScreen(ancList: widget.ancList), // 분리한 상단 탭바 + 리스트뷰 화면
     const Center(child: Text('달력을 그리자')), // 달력을 눌렀을 때 출력될 화면 함수를 지정해줘야함
-    SettingScreen(ud: widget.ud), // 임시 설정 화면 (로그아웃 기능만 대충 만들어둠) 디자인은 다시 해줄 것
+    SettingScreen(ud: widget.ud, logout: widget.logout), // 임시 설정 화면 (로그아웃 기능만 대충 만들어둠) 디자인은 다시 해줄 것
   ];
 
   @override

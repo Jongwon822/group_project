@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
-import 'package:group_project/screen/login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final userData ud;
+  final List<UserData> uds;
 
-  const RegisterScreen({super.key, required this.ud});
+  const RegisterScreen({super.key, required this.uds});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -31,6 +30,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context); //되돌아가기
+            },
+            icon: const Icon(Icons.arrow_back, size: 30,)
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -40,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               alignment: Alignment.center,
               child: Column(
                 children: [
-                  const SizedBox(height: 70),
+                  const SizedBox(height: 14),
                   const Text(
                     '앱 이름',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -197,11 +206,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // 회원가입 완료 하면 작동할 함수
   void _registerSuccess(BuildContext context) {
-    // 방금 입력한 _email, _password1을 ud.json 파일에 저장
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen(ud: widget.ud)),
-      (route) => false, // 이전 모든 화면 삭제
-    );
+    widget.uds.add(UserData(id: _email.text, password: _password1.text)); // 리스트에 저장
+    // 방금 입력한 _email, _password1을 ud.json 파일에 저장
+    Navigator.pop(context);
   }
 }

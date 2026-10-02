@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
-import 'package:group_project/screen/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
-  final userData ud;
-
-  const SettingScreen({super.key, required this.ud});
+  final UserData ud;
+  final VoidCallback logout;
+  const SettingScreen({super.key, required this.ud, required this.logout});
 
   @override
   State<SettingScreen> createState() => _SettingScreenState();
@@ -34,7 +34,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 backgroundColor: const Color(0xFFE4EEFF),
                 foregroundColor: const Color(0xFF1F5ADD),
                 child: Text(
-                  widget.ud.id,
+                  widget.ud.name,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
@@ -45,9 +45,13 @@ class _SettingScreenState extends State<SettingScreen> {
             ],
           ),
 
+
+
+          // onPressed 부분 함수는 유지해줘야해
           TextButton(
             onPressed: () {
-              _logout(context);
+              _deleteAutoLogin();
+              widget.logout();
             },
             style: TextButton.styleFrom(
               minimumSize: Size.zero,
@@ -67,13 +71,10 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  // 로그아웃 하면 작동할 함수
-  void _logout(BuildContext context) {
-    widget.ud.isLogged != widget.ud.isLogged;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen(ud: widget.ud)),
-      (route) => false,
-    );
+  // 로그아웃이 시 저장해 둔 자동로그인 정보 삭제
+  void _deleteAutoLogin() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('autoLogin', false);
+    prefs.remove('id');
   }
 }
