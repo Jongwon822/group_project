@@ -84,7 +84,6 @@ class HomeScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
-              const SizedBox(height: 20),
 
               // 첨삭지원 페이지 이동 박스
               _buildContentTile(
