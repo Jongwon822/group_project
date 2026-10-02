@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:group_project/data/announcement.dart';
+import 'package:group_project/data/user_data.dart';
+import 'package:group_project/screen/editing_screen.dart';
+import 'package:group_project/screen/feddback_screen.dart';
 
 
 // 이거 높이 조정할 일 있으면 주의해서 바꿔줘
@@ -24,53 +26,48 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           centerTitle: true,
+          // 앱바 색상 변함 방지
           backgroundColor: Colors.white,
           scrolledUnderElevation: 0,
-          // 앱바 색상 변함 방지
-
-          // 상단 탭바 모양 설정
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, bottom: 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TabBar(
-                  // 선택한 탭바는 검정 바탕에 흰 글씨, 선택되지 않은 탭바는 그 반대
-                  isScrollable: true,
-                  dividerColor: Colors.transparent,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.black,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  splashFactory: NoSplash.splashFactory,
-
-                  // 배경을 둥근 모양으로
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: Colors.black,
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-
-                  // 탭바 사이 여백
-                  padding: EdgeInsets.zero,
-                  labelPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  tabAlignment: TabAlignment.start,
-
-                  // 탭바 이름
-                  tabs: const [
-                    Tab(text: "추천 공고"),
-                    Tab(text: "추천 자격증"),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ),
 
-        // 탭바 아래 본문 내용 영역
+        // 본문 내용 가로 리스트뷰 및 첨삭/피드백 이동 위젯
         body: SingleChildScrollView(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16, bottom: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TabBar(
+                    // 선택한 탭바는 검정 바탕에 흰 글씨, 선택되지 않은 탭바는 그 반대
+                    isScrollable: true,
+                    dividerColor: Colors.transparent,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.black,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    splashFactory: NoSplash.splashFactory,
+
+                    // 배경을 둥근 모양으로
+                    indicator: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.black,
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+
+                    // 탭바 사이 여백
+                    padding: EdgeInsets.zero,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    tabAlignment: TabAlignment.start,
+
+                    // 탭바 이름
+                    tabs: const [
+                      Tab(text: "추천 공고"),
+                      Tab(text: "추천 자격증"),
+                    ],
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 210, // 높이조정은 공고탭 생성 함수에 있는 리스트뷰랑 동시에 바꿔야 오류 안나니까 주의좀
                 child: TabBarView(
@@ -86,22 +83,36 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // 첨삭지원 페이지 이동 박스
               _buildContentTile(
-                Icons.description_outlined,
-                '자소서·이력서 첨삭',
-                'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
-                '첨삭 시작하기',
+                  Icons.description_outlined,
+                  '자소서·이력서 첨삭',
+                  'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
+                  '첨삭 시작하기',
+                      () {
+                    Navigator.push(
+                      context, MaterialPageRoute(
+                        builder: (context) => const EditingScreen(),
+                      ),
+                    );
+                  }
               ),
 
-              // 면접지원 페이지 이동 박스
+              // 면접지원 페이지 이동 박스.
               _buildContentTile(
                 Icons.help_outline,
                 '면접 예상 질문 & 피드백',
                 '지원하신 직무와 이력 정보를 분석해 예상 꼬리 질문을 생성하고, 답변에 대한 종합 모의 면접 평가 점수와 개선 피드백을 전달합니다.',
                 '면접 시작하기',
+                    () {
+                  Navigator.push(
+                    context, MaterialPageRoute(
+                      builder: (context) => const FeedbackScreen(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -155,10 +166,10 @@ class HomeScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               if (ancList == null || ancList.isEmpty) {
                 return Container(
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery.of(context).size.width-32,
                   height: 155,
                   alignment: Alignment.center,
-                  child: Text('추천 공고 없음', style: TextStyle(color: Colors.grey)),
+                  child: const Text('추천 공고 없음', style: TextStyle(color: Colors.grey)),
                 );
               } else {
                 return _buildDetailBox(
@@ -200,7 +211,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             anc.period,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 24,
               letterSpacing: -0.5,
@@ -209,7 +220,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             anc.target,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.grey,
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -222,11 +233,12 @@ class HomeScreen extends StatelessWidget {
 
   // 첨삭하기랑 피드백하기 전용 위젯 만드는 함수
   Widget _buildContentTile(
-    IconData icon,
-    String title,
-    String content,
-    String buttonText,
-  ) {
+      IconData icon,
+      String title,
+      String content,
+      String buttonText,
+      VoidCallback onPressed,  //AI
+      ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -270,7 +282,7 @@ class HomeScreen extends StatelessWidget {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEEF2FF),
                 elevation: 0,
