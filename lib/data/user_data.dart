@@ -36,7 +36,7 @@ class UserSettings {
       );
 }
 
-// 개인과제처럼 json파일에 저장하면 되지 않을까?
+// 개인과제처럼 json파일에 저장하면 되지 않을까
 
 class UserData {
   final String id;
