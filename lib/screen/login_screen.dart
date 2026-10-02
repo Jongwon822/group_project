@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:group_project/data/announcement.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/main_navigation.dart';
 import 'package:group_project/screen/register.dart';
