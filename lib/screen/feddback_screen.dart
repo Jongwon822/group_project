@@ -8,7 +8,19 @@ class FeedbackScreen extends StatefulWidget {
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
-  final TextEditingController textController = TextEditingController();
+
+  final TextEditingController _textController1 = TextEditingController();
+  final TextEditingController _textController2 = TextEditingController();
+  final TextEditingController _textController3 = TextEditingController();
+
+  // 사용이 끝난 컨트롤러는 dispose()
+  @override
+  void dispose() {
+    _textController1.dispose();
+    _textController2.dispose();
+    _textController3.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +28,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 이거 해줘야 스크롤 내렸을 때 앱바 색상 안변함
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context); //되돌아가기
@@ -26,7 +39,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             )
         ),
         title: const Text(
-          "자소서 첨삭",
+          "면접 피드백",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -46,13 +59,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 color: const Color(0xFFE3EEFF),
               ),
               child: TextField(
-                controller: textController,
+                controller: _textController1,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
                   hintText: "예상질문",
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 18,
+                    fontSize: 12,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(14),
@@ -67,13 +80,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
-                controller: textController,
+                controller: _textController2,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
                   hintText: "답변을 작성하세요",
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 18,
+                    fontSize: 12,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(14),
@@ -122,13 +135,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
-                controller: textController,
+                controller: _textController3,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
                   hintText: "AI 답변",
                   hintStyle: TextStyle(
                     color: Colors.grey,
-                    fontSize: 18,
+                    fontSize: 12,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(14),

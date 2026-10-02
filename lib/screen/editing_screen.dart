@@ -9,9 +9,22 @@ class EditingScreen extends StatefulWidget {
 
 class _EditingScreenState extends State<EditingScreen> {
 
-  final TextEditingController textController = TextEditingController(); //AIIIIIIIIIIIIII
+  final TextEditingController _textController1 = TextEditingController(); //AIIIIIIIIIIIIII
   final List<String> _itemList = ['마케팅', 'A', 'B', 'C'];
   String? _selectedJob = '마케팅'; //--------AI
+
+
+  // 텍스트 컨트롤러를 하나로 지정하면 전부 같이 작동함 변수명 다르게 해줘야함
+  final TextEditingController _textController2 = TextEditingController();
+
+
+  // 사용이 끝난 컨트롤러는 dispose()
+  @override
+  void dispose() {
+    _textController1.dispose();
+    _textController2.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +32,7 @@ class _EditingScreenState extends State<EditingScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0, // 이거 해줘야 스크롤 내렸을 때 앱바 색상 안변함
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context); //되돌아가기
@@ -131,7 +145,7 @@ class _EditingScreenState extends State<EditingScreen> {
               ),
 
               child: TextField(
-                controller: textController,
+                controller: _textController1,
                 textAlignVertical: TextAlignVertical.top,
 
                 decoration: const InputDecoration(
@@ -192,7 +206,7 @@ class _EditingScreenState extends State<EditingScreen> {
               ),
 
               child: TextField(
-                controller: textController,
+                controller: _textController2,
                 textAlignVertical: TextAlignVertical.top,
 
                 decoration: const InputDecoration(
