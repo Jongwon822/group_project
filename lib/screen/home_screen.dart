@@ -86,7 +86,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 첨삭지원 페이지 이동 박스
-              /*_buildContentTile(
+              _buildContentTile(
                   Icons.description_outlined,
                   '자소서·이력서 첨삭',
                   'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
@@ -94,7 +94,9 @@ class HomeScreen extends StatelessWidget {
                       () {
                     Navigator.push(
                       context, MaterialPageRoute(
-                    ),
+                        builder: (context) => const EditingScreen(),
+                      ),
+                    );
                   }
               ),
 
@@ -107,12 +109,11 @@ class HomeScreen extends StatelessWidget {
                     () {
                   Navigator.push(
                     context, MaterialPageRoute(
-                    builder: (context) => const FeedbackScreen(),
-                  ),
+                      builder: (context) => const FeedbackScreen(),
+                    ),
                   );
                 },
               ),
-              */
             ],
           ),
         ),
