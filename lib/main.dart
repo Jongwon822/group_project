@@ -4,16 +4,7 @@ import 'package:group_project/screen/login_screen.dart';
 import 'package:group_project/screen/main_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/* 미리 만들어둔 기능!!
-홈화면 상단 앱바
-홈화면 상단 탭바 (추천 공고 / 추천 자격증)
-  ㄴ 추천공고의 경우 가로 스크롤이 가능한 listview 박스까지 구현함 (저장된 추천 공고를 불러오기까지 가능)
 
-홈화면 중단
-홈화면 하단 네비게이션바 (홈 / 달력 / 설정)
-
-
- */
 
 void main() async {
   // 내가 기록한 분야정보 불러오기
@@ -29,7 +20,8 @@ void main() async {
     Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
   ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
 
-  // 임시로 false로 해뒀음
+  // 임시 저장 아이디 비번임
+  // 지금 자동로그인은 구현했는데 새로만든 아이디를 json파일에 저장하는 작업을 안해서 해당 아이디로만 테스트 가능해
   List<UserData> uds = [
     UserData(id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원'),
     UserData(id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원')
@@ -43,11 +35,6 @@ void main() async {
   runApp(MyApp(ancList: ancList, uds: uds, initAutoLog: initAutoLog, savedId: savedId,));
 }
 
-// 임시로 일단 하단 네비게이션바를 메인으로 해두긴했는데
-// 로그인창을 만들어야 해서 home: (대충 로그인정보를 저장해둔 파일 검사하는 함수)
-// 1. 로그인 정보가 저장 안되어 있는 경우 -> LoginScreen()
-// 2. 로그인 정보가 저장 되어 있는 경우 -> HomeScreen()
-// 이런 식으로 하면 될듯?
 
 class MyApp extends StatefulWidget {
 

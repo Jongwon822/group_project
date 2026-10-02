@@ -3,6 +3,9 @@ import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+// 비밀번호 찾기 기능 미완성, 다이어로그로 할지 고민중
+
 class LoginScreen extends StatefulWidget {
   final List<UserData> uds;
   final List<Announcement>? ancList;
