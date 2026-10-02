@@ -94,13 +94,13 @@ class HomeScreen extends StatelessWidget {
                       () {
                     Navigator.push(
                       context, MaterialPageRoute(
-                      builder: (context) => const EditingScreen(),
-                    ),
+                        builder: (context) => const EditingScreen(),
+                      ),
                     );
                   }
               ),
 
-              // 면접지원 페이지 이동 박스
+              // 면접지원 페이지 이동 박스.
               _buildContentTile(
                 Icons.help_outline,
                 '면접 예상 질문 & 피드백',
@@ -109,8 +109,8 @@ class HomeScreen extends StatelessWidget {
                     () {
                   Navigator.push(
                     context, MaterialPageRoute(
-                    builder: (context) => const FeedbackScreen(),
-                  ),
+                      builder: (context) => const FeedbackScreen(),
+                    ),
                   );
                 },
               ),
