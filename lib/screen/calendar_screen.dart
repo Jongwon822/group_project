@@ -22,6 +22,7 @@ class CalendarScreen extends StatelessWidget {
 
     static const int year = 2026; //화면에 보여줄 연도
     static const int month = 9; // 화면에 보여줄 달
+    static const double cellHeight = 68;
 
     @override
     Widget build(BuildContext context) {
@@ -55,6 +56,7 @@ class CalendarScreen extends StatelessWidget {
                 children: [
                     _buildHeader(),
                     _buildWeekdayRow(),
+                    _buildDateGrid(),
                 ],
             ),
         );
@@ -116,6 +118,60 @@ class CalendarScreen extends StatelessWidget {
             ),
         );
     }
+    Widget _buildDateGrid() {
+        final DateTime firstDay = DateTime(year, month, 1);
+        final int leadingDays = firstDay.weekday % 7;
+        final int daysInMonth = DateTime(year, month + 1, 0).day;
+        final int rowCount = ((leadingDays +daysInMonth) / 7).ceil();
+
+        return Column(
+            children: [
+                for (int row = 0; row < rowCount; row++)
+                    Row(
+                        children: [
+                            for (int col = 0; col< 7; col++)
+                                Expanded(
+                                    child: _buildDayCell(DateTime(year, month, 1 - leadingDays + row * 7 + col), col),
+                                ),
+                        ],
+                    ),
+                ],
+        );
+    }
+    Widget _buildDayCell(DateTime day, int col) {
+        final bool isOutside = day.month != month;
+
+        //날짜 숫자 색
+        Color numberColor;
+        if (isOutside) {
+            numberColor = const Color(0xFFB3B8C0);
+        } else if (col == 0) {
+            numberColor = kSunday;
+        } else if (col == 6) {
+                    numberColor = kSaturday;
+        } else {
+            numberColor = const Color(0xFF222222);
+        }
+
+        return Container(
+            height: cellHeight,
+            padding: const EdgeInsets.fromLTRB(6, 8, 4, 4),
+            decoration: BoxDecoration(
+                color: isOutside ? kOutsideBg: Colors.white,
+                border: Border(
+                    right: col < 6 ? const BorderSide(color: kGridLine) : BorderSide.none,
+                    bottom: const BorderSide(color: kGridLine),
+                ),
+            ),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    Text('${day.day}', style: TextStyle(fontSize: 14, color: numberColor)),
+                    ],
+                ),
+            );
+        }
+
 }
 
 
