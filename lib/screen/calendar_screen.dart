@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/schedule.dart';
 
+// 근데 달력을 우리가 수정하는거면 StatefulWidget으로 가는게 더 편할지도?
+
 const Color kNavy = Color(0xFF243A66); //요일 줄 배경색, 연/월 글자색
 const Color kSunday = Color(0xFFB04A5A); //일요일 날짜 글자색
 const Color kSaturday = Color(0xFF3F5BA9); // 토요일 날짜 글자색, 상단 영문 제목 색

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final List<UserData> uds;
 
-  const RegisterScreen({super.key, required this.uds});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -207,7 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // 회원가입 완료 하면 작동할 함수
   void _registerSuccess(BuildContext context) {
 
-    widget.uds.add(UserData(id: _email.text, password: _password1.text)); // 리스트에 저장
+    UserManager.add(UserData(id: _email.text, password: _password1.text)); // 리스트에 저장
     // 방금 입력한 _email, _password1을 ud.json 파일에 저장하는 기능 필요
     Navigator.pop(context);
   }

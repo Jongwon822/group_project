@@ -7,11 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 // 비밀번호 찾기 기능 미완성, 다이어로그로 할지 고민중
 
 class LoginScreen extends StatefulWidget {
-  final List<UserData> uds;
-  final List<Announcement>? ancList;
   final ValueChanged<String> login;
 
-  const LoginScreen({super.key, this.ancList, required this.uds, required this.login});
+  const LoginScreen({super.key, required this.login});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -226,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            RegisterScreen(uds: widget.uds),
+            const RegisterScreen(),
       ),
     );
     if (mounted) {
@@ -250,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String _loginCheck() {
 
-    UserData? ud = widget.uds.where((ud) => ud.id == _email.text).firstOrNull;
+    UserData? ud = UserManager.uds.where((ud) => ud.id == _email.text).firstOrNull;
 
     if (ud == null) {
       return '이메일이 일치하지 않습니다.';

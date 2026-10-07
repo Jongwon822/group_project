@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/editing_screen.dart';
-import 'package:group_project/screen/feddback_screen.dart';
+import 'package:group_project/screen/feedback_screen.dart';
+import 'package:intl/intl.dart';
 
 
 // 이거 높이 조정할 일 있으면 주의해서 바꿔줘
@@ -9,9 +10,9 @@ import 'package:group_project/screen/feddback_screen.dart';
 
 class HomeScreen extends StatelessWidget {
 
-  final List<Announcement>? ancList; // 추천 공고 리스트
+  final UserData ud;
 
-  const HomeScreen({super.key, required this.ancList});
+  const HomeScreen({super.key, required this.ud});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                   // 스크롤을 통한 탭 이동을 막음
                   children: [
                     // 1번 탭 - 추천 공고 내용 (가로 리스트뷰 포함)
-                    _buildAnnouncementTab(ancList),
+                    _buildAnnouncementTab(ud.ancList),
                     // 2번 탭 - 추천 자격증 내용 (아직 안만듬)
                     const Center(child: Text("추천 자격증 화면")),
                     // 임시로 해둔거고 추천공고 만드는 함수처럼 추가해줘야함
@@ -94,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                       () {
                     Navigator.push(
                       context, MaterialPageRoute(
-                        builder: (context) => const EditingScreen(),
+                        builder: (context) => EditingScreen(ud: ud,),
                       ),
                     );
                   }
@@ -109,7 +110,7 @@ class HomeScreen extends StatelessWidget {
                     () {
                   Navigator.push(
                     context, MaterialPageRoute(
-                      builder: (context) => const FeedbackScreen(),
+                      builder: (context) => FeedbackScreen(ud: ud),
                     ),
                   );
                 },
@@ -122,7 +123,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   // 추천 공고 탭 전체 레이아웃
-  Widget _buildAnnouncementTab(List<Announcement>? ancList) {
+  Widget _buildAnnouncementTab(List<Announcement> ancList) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -159,12 +160,12 @@ class HomeScreen extends StatelessWidget {
           height: 155,
           child: ListView.builder(
             scrollDirection: Axis.horizontal, // 가로로 넘기기
-            itemCount: ancList == null || ancList.isEmpty
+            itemCount: ancList.isEmpty
                 ? 1 // 비어있으면 '추천 공고 없음' 박스 하나 출력할 예정
                 : ancList.length, // ancList에 저장된 공고 개수
             padding: const EdgeInsets.only(left: 16),
             itemBuilder: (context, index) {
-              if (ancList == null || ancList.isEmpty) {
+              if (ancList.isEmpty) {
                 return Container(
                   width: MediaQuery.of(context).size.width-32,
                   height: 155,
@@ -210,7 +211,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            anc.period,
+            '${DateFormat('MM/dd').format(anc.startPeriod)}~${DateFormat('MM/dd').format(anc.endPeriod)}',
             style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 24,

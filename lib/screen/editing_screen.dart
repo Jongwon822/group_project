@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:group_project/data/user_data.dart';
 
 class EditingScreen extends StatefulWidget {
-  const EditingScreen({super.key});
+
+  final UserData ud; // 나중에 AI 답변 출력할 때 프롬프트에 사용할 세팅 값을 ud로 가져오는 방식으로 만들어줘
+  const EditingScreen({super.key, required this.ud});
 
   @override
   State<EditingScreen> createState() => _EditingScreenState();
 }
 
 class _EditingScreenState extends State<EditingScreen> {
+
 
   final TextEditingController _textController1 = TextEditingController(); //AIIIIIIIIIIIIII
   final List<String> _itemList = ['마케팅', 'A', 'B', 'C'];

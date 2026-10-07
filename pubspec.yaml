@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  path_provider: ^2.1.6
   shared_preferences: ^2.5.5
   table_calendar: ^3.3.0
 

@@ -3,7 +3,7 @@ class ScheduleItem{
     final String id;
     final String title;
     final String company;
-    final Datetime date;
+    final DateTime date;
 
     const ScheduleItem({
         required this.id,
@@ -18,11 +18,11 @@ class ScheduleItem{
             'company': company,
             'date': date.toIso8601String(),
         };
-    factory SceduleItem.fromJson(Map<String, dynamic> json) => ScheduleItem(
+    factory ScheduleItem.fromJson(Map<String, dynamic> json) => ScheduleItem(
         id: json['id']as String,
         title: json['title'] as String,
         company: json['company'] as String,
         date: DateTime.parse(json['date'] as String),
         );
 
-    }
+}

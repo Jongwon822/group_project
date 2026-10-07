@@ -14,17 +14,17 @@ void main() async {
   // 추천 공고 저장된 파일 불러오기
   List<Announcement>? ancList = [
     Announcement(
-        title: '삼성전자 상반기 채용 공고', period: '3.15~3.17', target: '소프트웨어 직군'),
+        title: '삼성전자 상반기 채용 공고', startPeriod: DateTime(2026,10,7), endPeriod: DateTime(2026,10,10), target: '소프트웨어 직군'),
     Announcement(
-        title: '하이닉스 상반기 채용 공고', period: '3.15~3.17', target: '전자정보 직군'),
-    Announcement(title: 'HD현대 상반기 채용 공고', period: '3.15~3.17', target: '반도체 직군')
+        title: '하이닉스 상반기 채용 공고', startPeriod: DateTime(2026,10,8), endPeriod: DateTime(2026,10,12), target: '전자정보 직군'),
+    Announcement(title: 'HD현대 상반기 채용 공고', startPeriod: DateTime(2026,10,9), endPeriod: DateTime(2026,10,13), target: '반도체 직군')
   ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
 
   // 임시 저장 아이디 비번임
   // 지금 자동로그인은 구현했는데 새로만든 아이디를 json파일에 저장하는 작업을 안해서 해당 아이디로만 테스트 가능해
   List<UserData> uds = [
-    UserData(id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원'),
-    UserData(id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원')
+    UserData(id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원', ancList: ancList),
+    UserData(id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원', ancList: ancList)
   ];
 
   // 자동 로그인 값 불러오기
@@ -32,18 +32,16 @@ void main() async {
   bool initAutoLog = prefs.getBool('autoLogin') ?? false; // 앱을 처음 킨거라면 false로 설정
   String? savedId = prefs.getString('id');
 
-  runApp(MyApp(ancList: ancList, uds: uds, initAutoLog: initAutoLog, savedId: savedId,));
+  runApp(MyApp(initAutoLog: initAutoLog, savedId: savedId,));
 }
 
 
 class MyApp extends StatefulWidget {
 
-  final List<Announcement>? ancList;
-  final List<UserData> uds;
   final bool initAutoLog;
   final String? savedId;
 
-  const MyApp({super.key, required this.ancList, required this.uds, required this.initAutoLog, required this.savedId});
+  const MyApp({super.key, required this.initAutoLog, required this.savedId});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -65,7 +63,7 @@ class _MyAppState extends State<MyApp> {
     if (autoLog && widget.savedId != null) {
       try {
         // ud에 해당 id로 검색한 객체를 할당
-        ud = widget.uds.firstWhere((ud) => ud.id == widget.savedId);
+        ud = UserManager.uds.firstWhere((ud) => ud.id == widget.savedId);
       } catch (e) {
         // id 저장은 되어있는데 uds에 없다면 null 할당
         ud = null;
@@ -77,7 +75,7 @@ class _MyAppState extends State<MyApp> {
   // 해당 이메일을 가진 UserData 객체를 ud에 저장
   void _Login(String id) {
     setState(() {
-      ud = widget.uds.firstWhere((ud) => ud.id == id); // ud에 id로 검색해서 찾은 객체를 할당
+      ud = UserManager.uds.firstWhere((ud) => ud.id == id); // ud에 id로 검색해서 찾은 객체를 할당
     });
   }
 
@@ -99,8 +97,8 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
         ),
         home: ud != null
-            ? MainNavigationScreen(ancList: widget.ancList, ud: ud!, logout: _Logout)
-            : LoginScreen(uds: widget.uds, login: _Login)
+            ? MainNavigationScreen(ud: ud!, logout: _Logout)
+            : LoginScreen(login: _Login)
         );
   }
 }
