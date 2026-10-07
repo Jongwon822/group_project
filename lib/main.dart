@@ -22,10 +22,8 @@ void main() async {
 
   // 임시 저장 아이디 비번임
   // 지금 자동로그인은 구현했는데 새로만든 아이디를 json파일에 저장하는 작업을 안해서 해당 아이디로만 테스트 가능해
-  List<UserData> uds = [
-    UserData(id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원', ancList: ancList),
-    UserData(id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원', ancList: ancList)
-  ];
+  UserManager.add(UserData(id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원', ancList: ancList));
+  UserManager.add(UserData(id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원', ancList: ancList));
 
   // 자동 로그인 값 불러오기
   final SharedPreferences prefs = await SharedPreferences.getInstance();
