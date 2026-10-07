@@ -28,7 +28,7 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
   }
 
   void _resetJobs() {
-    // TODO: 완전히 새로 선택: job_category_select.dart 화면이 완성되면 그 화면으로 이동
+    // jabcategory와 연결
   }
   @override
   void initState(){
