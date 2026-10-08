@@ -48,23 +48,27 @@ class Announcement {
 
 // 설정 화면에서 쓰는 값 (피드백 스타일, 관심 직군, 관심 기업)
 class UserSettings {
+  final bool firstSetting;
   final FeedbackStyle feedbackStyle;
   final List<String> jobs;
   final List<String> companies;
 
   const UserSettings({
     //이메일, 피드백 스타일, 직업, 회사 생성자
+    this.firstSetting = true,
     this.feedbackStyle = FeedbackStyle.soft,
     this.jobs = const [],
     this.companies = const [],
   });
 
   UserSettings copyWith({
+    bool? firstSetting,
     FeedbackStyle? feedbackStyle,
     List<String>? jobs,
     List<String>? companies,
   }) =>
       UserSettings(
+        firstSetting: firstSetting ?? this.firstSetting,
         feedbackStyle: feedbackStyle ?? this.feedbackStyle,
         jobs: jobs ?? this.jobs,
         companies: companies ?? this.companies,
@@ -72,6 +76,7 @@ class UserSettings {
 
   // Map으로 변환
   Map<String, dynamic> toJson() => {
+        'firstSetting': firstSetting,
         'feedbackStyle': feedbackStyle.name,
         // enum 이름 저장 ('soft', 'normal', 'strict')
         'jobs': jobs,
@@ -81,6 +86,7 @@ class UserSettings {
   // UserSettings로 변환
   factory UserSettings.fromJson(Map<String, dynamic> json) {
     return UserSettings(
+      firstSetting: json['firstSetting'] as bool? ?? false,
       feedbackStyle: FeedbackStyle.values.firstWhere(
         (e) => e.name == json['feedbackStyle'],
         orElse: () => FeedbackStyle.soft, // 저장된 값이 없거나 일치하는게 없으면 soft
@@ -134,7 +140,6 @@ class UserData {
 }
 
 class UserManager {
-
   //전체 유저 데이터 리스트
   static List<UserData> uds = [];
 
@@ -144,6 +149,7 @@ class UserManager {
     final directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/user_data.json'); // 파일경로는 나중에 정해주자
   }
+
   // --------------------
 
   // json파일에서 불러온 값을 uds에 저장
@@ -200,5 +206,4 @@ class UserManager {
     uds.removeWhere((ud) => ud.id == id);
     await save();
   }
-
 }
