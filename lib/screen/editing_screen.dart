@@ -230,26 +230,27 @@ class _EditingScreenState extends State<EditingScreen> {
 
             SizedBox(
               width: double.infinity,
-              height: 39,
+              height: 48,
               child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Color(0xFF3B82F6),
+                    backgroundColor: const Color(0xFFEEF2FF),
+                    foregroundColor: const Color(0xFF4F46E5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: const BorderSide(
+                    /*side: const BorderSide(
                       color: Color(0xFF3B82F6),
                       width: 1.0,
-                    ),
+                    ),*/
                   ),//request feedback
                   child:
                   const Text(
                     "면접 질문 만들기",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xFF4F46E5)
                     ),
                   )
               ),
