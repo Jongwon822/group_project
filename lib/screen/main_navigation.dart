@@ -31,6 +31,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
         // bottomNavigationBar에서 label 표시 숨기기
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: false,
