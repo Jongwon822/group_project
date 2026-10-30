@@ -3,6 +3,7 @@ import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/editing_screen.dart';
 import 'package:group_project/screen/feedback_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:group_project/screen/anc_list.dart';
 
 
 // 이거 높이 조정할 일 있으면 주의해서 바꿔줘
@@ -76,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                   // 스크롤을 통한 탭 이동을 막음
                   children: [
                     // 1번 탭 - 추천 공고 내용 (가로 리스트뷰 포함)
-                    _buildAnnouncementTab(ud.ancList),
+                    _buildAnnouncementTab(ud.ancList, context),
                     // 2번 탭 - 추천 자격증 내용 (아직 안만듬)
                     const Center(child: Text("추천 자격증 화면")),
                     // 임시로 해둔거고 추천공고 만드는 함수처럼 추가해줘야함
@@ -123,7 +124,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   // 추천 공고 탭 전체 레이아웃
-  Widget _buildAnnouncementTab(List<Announcement> ancList) {
+  Widget _buildAnnouncementTab(List<Announcement> ancList, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,7 +140,11 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  // 자세히 보기 눌렀을 때 작동하는거 navigation.push로 나중에 기입해줄것!!
+                  Navigator.push(
+                    context, MaterialPageRoute(
+                    builder: (context) => AncDetail(ud: ud),
+                  ),
+                  );
                 },
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
