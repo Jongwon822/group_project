@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   // TextField()에 적힌 값을 사용하기 위한 컨트롤러 생성
+  final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password1 = TextEditingController();
   final TextEditingController _password2 = TextEditingController();
@@ -20,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // 사용이 끝난 컨트롤러는 dispose()
   @override
   void dispose() {
+    _name.dispose();
     _email.dispose();
     _password1.dispose();
     _password2.dispose();
@@ -66,6 +68,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    width: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey),
+                    ),
+                    child: TextField(
+                      controller: _name,
+                      decoration: const InputDecoration(
+                        hintText: '이름을 입력하세요',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     width: 300,
@@ -172,6 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String email = _email.text;
     String password1 = _password1.text;
     String password2 = _password2.text;
+    String name = _name.text;
 
     // AI 코드 활용
     // ^[^@\s] : @와 공백을 제외한 문자가 1자 이상 필수
@@ -182,17 +202,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final RegExp emailCheck =
         RegExp(r'^[^@\s]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$');
 
+    if (name.isEmpty) {
+      return '이름 입력이 누락되었습니다.';
+    }
     if (email.isEmpty) {
       return '이메일 입력이 누락되었습니다.';
-    }
-    if (password1.isEmpty || password2.isEmpty) {
-      return '비밀번호 입력이 누락되었습니다.';
     }
     if (email.contains(' ')) {
       return '이메일에 공백이 포함되어 있습니다.';
     }
     if (!emailCheck.hasMatch(email)) {
       return '이메일은 email@domain.com 형식입니다.';
+    }
+    if (password1.isEmpty || password2.isEmpty) {
+      return '비밀번호 입력이 누락되었습니다.';
     }
     if (password1.contains(' ') || password2.contains(' ')) {
       return '비밀번호에 공백이 포함되어 있습니다.';
@@ -206,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // 회원가입 완료 하면 작동할 함수
   void _registerSuccess(BuildContext context) {
 
-    UserManager.add(UserData(id: _email.text, password: _password1.text)); // 리스트에 저장
+    UserManager.add(UserData(id: _email.text, password: _password1.text, name: _name.text)); // 리스트에 저장
     // 방금 입력한 _email, _password1을 ud.json 파일에 저장하는 기능 필요
     Navigator.pop(context);
   }
