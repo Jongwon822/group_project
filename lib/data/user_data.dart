@@ -103,6 +103,10 @@ class UserData {
   String name;
   List<Announcement> ancList;
   UserSettings userSettings;
+  //임시저장(앱 껐다키면 초기화 / 껐다켜도 유지되게 ?)
+  String draftJob = '마케팅';
+  String draftEssay = '';
+  String draftResult = '';
 
   UserData(
       {required this.id,

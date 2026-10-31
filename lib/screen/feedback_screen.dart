@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:group_project/data/user_data.dart';
 
 class FeedbackScreen extends StatefulWidget {
-
-  final UserData ud;
-
-  const FeedbackScreen({super.key, required this.ud});
+  const FeedbackScreen({super.key});
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();
