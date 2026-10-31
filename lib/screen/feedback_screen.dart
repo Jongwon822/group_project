@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:group_project/data/user_data.dart';
 
 class FeedbackScreen extends StatefulWidget {
-  const FeedbackScreen({super.key});
+
+  final UserData ud;
+
+  const FeedbackScreen({super.key, required this.ud});
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();
@@ -56,7 +60,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               height: 120,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: const Color(0xFFE3EEFF),
+                color: const Color(0xFFE0E7FF),
               ),
               child: TextField(
                 controller: _textController1,
@@ -81,7 +85,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
               child: TextField(
                 controller: _textController2,
-                textAlignVertical: TextAlignVertical.top,
+                maxLines: null,//자동줄바꿈
+                expands: true,//입력영역
+                keyboardType: TextInputType.multiline,//여러줄입력
+                textAlignVertical: TextAlignVertical.top,//위쪽부터글자
                 decoration: const InputDecoration(
                   hintText: "답변을 작성하세요",
                   hintStyle: TextStyle(
@@ -100,8 +107,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3B82F6),
-                    foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFF4F46E5),
+                      foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -136,6 +143,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
               child: TextField(
                 controller: _textController3,
+                maxLines: null,
+                expands: true,
+                keyboardType: TextInputType.multiline,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: const InputDecoration(
                   hintText: "AI 답변",
@@ -159,14 +169,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF3B82F6),
+                          backgroundColor: const Color(0xFFEEF2FF),
+                          foregroundColor: const Color(0xFF4F46E5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: const BorderSide(
-                            color: Color(0xFF3B82F6),
-                            width: 1.0,
                           ),
                         ), //request feedback
                         child: const Text(
@@ -186,18 +192,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF3B82F6),
+                          backgroundColor: const Color(0xFFEEF2FF),
+                          foregroundColor: const Color(0xFF4F46E5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          side: const BorderSide(
-                            color: Color(0xFF3B82F6),
-                            width: 1.0,
-                          ),
                         ), //request feedback
                         child: const Text(
-                          "이전 질문",
+                          "다음 질문",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
