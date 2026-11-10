@@ -100,7 +100,7 @@ class UserSettings {
 class UserData {
   final String id;
   final String password;
-  String name;
+  final String name;
   List<Announcement> ancList;
   UserSettings userSettings;
   //임시저장(앱 껐다키면 초기화 / 껐다켜도 유지되게 ?)
@@ -111,7 +111,7 @@ class UserData {
   UserData(
       {required this.id,
       required this.password,
-      this.name = '',
+      required this.name,
       List<Announcement>? ancList,
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [];

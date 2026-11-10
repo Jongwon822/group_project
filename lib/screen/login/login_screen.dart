@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
-import 'package:group_project/screen/register.dart';
+import 'package:group_project/screen/login/register_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:group_project/screen/login/id_password_finder_screen.dart';
 
 
 // 비밀번호 찾기 기능 미완성, 다이어로그로 할지 고민중
@@ -152,13 +153,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextButton(
                               onPressed: () {
                                 // 비밀번호 찾기 창 => 이메일, 이름을 입력하면 출력해줌
+                                _OpenIdPasswordFinder('id');
                               },
                               style: TextButton.styleFrom(
                                 minimumSize: Size.zero,
                                 padding: EdgeInsets.zero,
                               ),
                               child: const Text(
-                                "비밀번호 찾기",
+                                "이메일 찾기",
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 13,
@@ -166,6 +168,29 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                      Container(
+                        height: 13,
+                        width: 1,
+                        color: Colors.grey,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // 비밀번호 찾기 창 => 이메일, 이름을 입력하면 출력해줌
+                          _OpenIdPasswordFinder('password');
+                        },
+                        style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Text(
+                          "비밀번호 찾기",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                       Container(
@@ -235,6 +260,25 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
+
+  // 비밀번호 찾기 창 넘어갔다가 다시 돌아올 때 에러 메세지랑 입력 내용 지우는 함수
+  Future<void> _OpenIdPasswordFinder(String selection) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+        PasswordFinderScreen(selection: selection),
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        errorMessage = '';
+        _email.clear();
+        _password.clear();
+      });
+    }
+  }
+
 
   // 로그인 했을 때 autoLogin이 true라면
   void _savedAutoLogin(bool autoLogin) async {
