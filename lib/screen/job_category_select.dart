@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
-
+import 'package:group_project/screen/settingscreens/chip_editor.dart';
 class JobCategoryScreen extends StatefulWidget {
   final ValueChanged<String> login;
   final UserData ud;
@@ -10,13 +10,31 @@ class JobCategoryScreen extends StatefulWidget {
   @override
   State<JobCategoryScreen> createState() => _JobCategoryScreenState();
 }
-
 class _JobCategoryScreenState extends State<JobCategoryScreen> {
-  int selectionCounter1 = 0;
-  int selectionCounter2 = 0;
-  int addCounter = 0;
+  // selectionCounter1, selectionCounter2, addCounter 삭제 → 리스트로 대체
+  final List<String> _humanitiesJobs = []; // 문과 분야
+  final List<String> _scienceJobs = [];    // 이과 분야
+  final List<String> _companies = [];      // 관심 회사
   int pageCounter = 0;
+  bool _saving = false;
 
+  void _addJob(List<String> target, String v) {
+    if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v)) return;
+    setState(() => target.add(v));
+  }
+// 마지막 페이지 '저장하기' (설정 화면 _save()와 같은 흐름)
+  Future<void> _finish() async {
+    if (_saving) return; // 두 번 눌림 방지
+    _saving = true;
+    widget.ud.userSettings = widget.ud.userSettings.copyWith(
+      firstSetting: false,                         // 초기 세팅 완료
+      jobs: [..._humanitiesJobs, ..._scienceJobs], // 문과 + 이과 합쳐서 저장
+      companies: _companies,
+    );
+    await UserManager.save();
+    if (!mounted) return;
+    widget.login(widget.ud.id); // 메인 화면 진입
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,7 +130,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 if (pageCounter == 1) ...[
                   const TextSpan(text: '현재 '),
                   TextSpan(
-                      text: '${selectionCounter1 + selectionCounter2}개',
+                      text: '${_humanitiesJobs.length + _scienceJobs.length}개',
                       style: const TextStyle(color: Color(0xFF3B82F6))),
                   const TextSpan(text: ' 선택됨')
                 ]
@@ -128,10 +146,9 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (pageCounter == 2) {
-                  // 3페이지(최종페이지) 도달 시 메인화면 진입
-                  widget.ud.userSettings = widget.ud.userSettings
-                      .copyWith(firstSetting: false); // 해당 id의 초기세팅 불필요로 설정
-                  widget.login(widget.ud.id);
+                    // 3페이지(최종): 칩 값까지 저장하고 메인화면 진입
+                    _finish();
+
                 } else {
                   setState(() {
                     pageCounter = pageCounter + 1;
@@ -207,24 +224,26 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
                     child: Text(
-                      selectionCounter1.toString(),
+                      _humanitiesJobs.length.toString(),
                       style: const TextStyle(fontSize: 11),
                     ),
-                  )
+                  ),
                 ],
               ),
 
               // chip 넣을 공간
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: const Text(
-                  '준혁아 설정에 만든 chip 여기에 이식해줘',
-                  style: TextStyle(fontSize: 25),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ChipEditor(
+                  items: _humanitiesJobs,
+                  dialogTitle: '문과 직군 추가',
+                  onAdd: (v) => _addJob(_humanitiesJobs, v),
+                  onRemove: (v) => setState(() => _humanitiesJobs.remove(v)),
                 ),
               ),
 
@@ -239,23 +258,25 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
                     child: Text(
-                      selectionCounter2.toString(),
+                      _scienceJobs.length.toString(),
                       style: const TextStyle(fontSize: 11),
                     ),
-                  )
+                  ),
                 ],
               ),
               // chip 넣을 공간
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: const Text(
-                  '준혁아 설정에 만든 chip 여기에 이식해줘',
-                  style: TextStyle(fontSize: 25),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ChipEditor(
+                  items: _scienceJobs,
+                  dialogTitle: '이과 직군 추가',
+                  onAdd: (v) => _addJob(_scienceJobs, v),
+                  onRemove: (v) => setState(() => _scienceJobs.remove(v)),
                 ),
               ),
             ],
@@ -301,24 +322,26 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
                     child: Text(
-                      addCounter.toString(),
+                      _companies.length.toString(),
                       style: const TextStyle(fontSize: 11),
                     ),
-                  )
+                  ),
                 ],
               ),
 
               // chip 넣을 공간
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: const Text(
-                  '준혁아 설정에 만든 chip 여기에 이식해줘',
-                  style: TextStyle(fontSize: 25),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: ChipEditor(
+                  items: _companies,
+                  dialogTitle: '관심 회사 추가',
+                  onAdd: (v) => setState(() => _companies.add(v)),
+                  onRemove: (v) => setState(() => _companies.remove(v)),
                 ),
               ),
             ],
