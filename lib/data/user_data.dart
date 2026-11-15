@@ -50,48 +50,55 @@ class Announcement {
 class UserSettings {
   final bool firstSetting;
   final FeedbackStyle feedbackStyle;
-  final List<String> jobs;
+  final List<String> humanitiesJobs; // 문과 직군
+  final List<String> scienceJobs;    // 이과 직군
   final List<String> companies;
 
+  // 문과 + 이과를 합친 목록 (읽기 전용)
+  List<String> get jobs => [...humanitiesJobs, ...scienceJobs];
+
   const UserSettings({
-    //이메일, 피드백 스타일, 직업, 회사 생성자
     this.firstSetting = true,
     this.feedbackStyle = FeedbackStyle.soft,
-    this.jobs = const [],
+    this.humanitiesJobs = const [],
+    this.scienceJobs = const [],
     this.companies = const [],
   });
 
   UserSettings copyWith({
     bool? firstSetting,
     FeedbackStyle? feedbackStyle,
-    List<String>? jobs,
+    List<String>? humanitiesJobs,
+    List<String>? scienceJobs,
     List<String>? companies,
   }) =>
       UserSettings(
         firstSetting: firstSetting ?? this.firstSetting,
         feedbackStyle: feedbackStyle ?? this.feedbackStyle,
-        jobs: jobs ?? this.jobs,
+        humanitiesJobs: humanitiesJobs ?? this.humanitiesJobs,
+        scienceJobs: scienceJobs ?? this.scienceJobs,
         companies: companies ?? this.companies,
       );
 
   // Map으로 변환
   Map<String, dynamic> toJson() => {
-        'firstSetting': firstSetting,
-        'feedbackStyle': feedbackStyle.name,
-        // enum 이름 저장 ('soft', 'normal', 'strict')
-        'jobs': jobs,
-        'companies': companies,
-      };
+    'firstSetting': firstSetting,
+    'feedbackStyle': feedbackStyle.name,
+    'humanitiesJobs': humanitiesJobs,
+    'scienceJobs': scienceJobs,
+    'companies': companies,
+  };
 
   // UserSettings로 변환
   factory UserSettings.fromJson(Map<String, dynamic> json) {
     return UserSettings(
       firstSetting: json['firstSetting'] as bool? ?? false,
       feedbackStyle: FeedbackStyle.values.firstWhere(
-        (e) => e.name == json['feedbackStyle'],
-        orElse: () => FeedbackStyle.soft, // 저장된 값이 없거나 일치하는게 없으면 soft
+            (e) => e.name == json['feedbackStyle'],
+        orElse: () => FeedbackStyle.soft,
       ),
-      jobs: List<String>.from(json['jobs'] ?? []),
+      humanitiesJobs: List<String>.from(json['humanitiesJobs'] ?? []),
+      scienceJobs: List<String>.from(json['scienceJobs'] ?? []),
       companies: List<String>.from(json['companies'] ?? []),
     );
   }

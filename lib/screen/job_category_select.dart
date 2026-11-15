@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/settingscreens/chip_editor.dart';
+import 'package:group_project/data/job_presets.dart';
 class JobCategoryScreen extends StatefulWidget {
   final ValueChanged<String> login;
   final UserData ud;
@@ -22,13 +23,14 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
     if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v)) return;
     setState(() => target.add(v));
   }
-// 마지막 페이지 '저장하기' (설정 화면 _save()와 같은 흐름)
+// 마지막 페이지 '저장하기'
   Future<void> _finish() async {
     if (_saving) return; // 두 번 눌림 방지
     _saving = true;
     widget.ud.userSettings = widget.ud.userSettings.copyWith(
-      firstSetting: false,                         // 초기 세팅 완료
-      jobs: [..._humanitiesJobs, ..._scienceJobs], // 문과 + 이과 합쳐서 저장
+      firstSetting: false,             // 초기 세팅 완료
+      humanitiesJobs: _humanitiesJobs, // 문과
+      scienceJobs: _scienceJobs,       // 이과
       companies: _companies,
     );
     await UserManager.save();
@@ -44,7 +46,6 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
-        // 앱바 색상 변함 방지
         backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
       ),
@@ -146,7 +147,6 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (pageCounter == 2) {
-                    // 3페이지(최종): 칩 값까지 저장하고 메인화면 진입
                     _finish();
 
                 } else {
@@ -241,6 +241,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: ChipEditor(
                   items: _humanitiesJobs,
+                  options: humanitiesJobPresets,
                   dialogTitle: '문과 직군 추가',
                   onAdd: (v) => _addJob(_humanitiesJobs, v),
                   onRemove: (v) => setState(() => _humanitiesJobs.remove(v)),
@@ -269,11 +270,11 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                 ],
               ),
-              // chip 넣을 공간
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: ChipEditor(
                   items: _scienceJobs,
+                  options: scienceJobPresets,
                   dialogTitle: '이과 직군 추가',
                   onAdd: (v) => _addJob(_scienceJobs, v),
                   onRemove: (v) => setState(() => _scienceJobs.remove(v)),
@@ -334,7 +335,6 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 ],
               ),
 
-              // chip 넣을 공간
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: ChipEditor(

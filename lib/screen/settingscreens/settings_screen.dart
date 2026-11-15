@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_edit_screen.dart';
 // 데이터들 몽땅 ud로 통합시켯습니다. 이러면 provider와 storage파일은 필요없겟네요
 // sectioncard로 카드틀 생성, infoRow로 카드내 글 생서함다
-//저희 근데 설정란에 이메일 적는란 필요하나요? 내가 알기론 ID가 곧 email이긴한데
 class SettingScreen extends StatefulWidget {
   final UserData ud;
   final VoidCallback logout;
@@ -73,7 +72,7 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget build(BuildContext context) {
     final ud = widget.ud;
     final s = ud.userSettings;
-    final displayName = ud.name.isNotEmpty ? //이름이 없으면 id로 대체하는 코드인데 필요할려나
+    final displayName = ud.name.isNotEmpty ? //이름이 없으면 id로 대체하는 코드
         ud.name : ud.id;// 혹시 몰라 넣어둠
     final initial = displayName[0];
     return Scaffold(

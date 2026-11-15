@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'add_chip_dialog.dart';
 import 'package:group_project/data/user_data.dart';
+import 'chip_editor.dart';
+import 'package:group_project/data/job_presets.dart';
 //widget selectedChip, addChip,sectionTitle, style button들로 기존 버튼들을 몇몇 widget으로 뭉쳣습니다.
 //
 class SettingsEditScreen extends StatefulWidget{
@@ -15,11 +17,12 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
   static const _borderGrey = Color(0xFFE5E7EB); // 색깔코드들 변수들로 통합해부림
   late FeedbackStyle _style;
   bool _saving = false;
-  late List<String> _jobs;
+  late List<String> _humanitiesJobs; // 문과
+  late List<String> _scienceJobs;    // 이과
   late List<String> _companies;
-  Future<void> _addJob() async {
-    final v = await showAddChipDialog(context, '관심 직군 추가');
-    if (v != null && v.isNotEmpty && !_jobs.contains(v)) setState(() => _jobs.add(v));
+  void _addJob(List<String> target, String v) {
+    if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v)) return; // 문과·이과 통틀어 중복 방지
+    setState(() => target.add(v));
   }
 
   Future<void> _addCompany() async {
@@ -35,15 +38,17 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
     super.initState();
     final s = widget.ud.userSettings;
     _style = s.feedbackStyle;
-    _jobs = [...s.jobs];
+    _humanitiesJobs = [...s.humanitiesJobs];
+    _scienceJobs = [...s.scienceJobs];
     _companies = [...s.companies];
   }
   Future<void> _save() async {
     if (_saving) return;
-    setState(() => _saving = true); // 두 번 누릴때, 두번 실행하는 것 을 방지합니다. 누군가 백퍼 두번 누른다. 이런걸로 점수까이면 나 정말 억울해
+    setState(() => _saving = true); // 두 번 누릴때, 두번 실행하는 것 을 방지합니다.
     widget.ud.userSettings = widget.ud.userSettings.copyWith(
       feedbackStyle: _style,
-      jobs: _jobs,
+      humanitiesJobs: _humanitiesJobs,
+      scienceJobs: _scienceJobs,
       companies: _companies,
     );
     await UserManager.save();
@@ -144,7 +149,7 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
 
           _sectionTitle(
             '관심 직군',
-            count: _jobs.length,
+            count: _humanitiesJobs.length + _scienceJobs.length,
             trailing: TextButton(
               onPressed: _resetJobs,
               style: TextButton.styleFrom(foregroundColor: Colors.grey),
@@ -152,10 +157,25 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final j in _jobs) _selectedChip(j, () => setState(() => _jobs.remove(j))),
-            _addChip(_addJob),
-          ]),
+          const Text('문과', style: TextStyle(fontSize: 13, color: Colors.grey)),
+          const SizedBox(height: 6),
+          ChipEditor(
+            items: _humanitiesJobs,
+            options: humanitiesJobPresets,
+            dialogTitle: '문과 직군 추가',
+            onAdd: (v) => _addJob(_humanitiesJobs, v),
+            onRemove: (v) => setState(() => _humanitiesJobs.remove(v)),
+          ),
+          const SizedBox(height: 12),
+          const Text('이과', style: TextStyle(fontSize: 13, color: Colors.grey)),
+          const SizedBox(height: 6),
+          ChipEditor(
+            items: _scienceJobs,
+            options: scienceJobPresets,
+            dialogTitle: '이과 직군 추가',
+            onAdd: (v) => _addJob(_scienceJobs, v),
+            onRemove: (v) => setState(() => _scienceJobs.remove(v)),
+          ),
           const SizedBox(height: 32),
 
           _sectionTitle('관심 기업'),
