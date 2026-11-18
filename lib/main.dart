@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/job_category_select.dart';
 import 'package:group_project/screen/login/login_screen.dart';
@@ -6,35 +6,14 @@ import 'package:group_project/screen/main_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // 내가 기록한 분야정보 불러오기
   // 나의 달력에 기록된 정보 불러오기
-  // 설정 값 불러오기
 
-  // 추천 공고 저장된 파일 불러오기
-  List<Announcement>? ancList = [
-    Announcement(
-        title: '삼성전자 상반기 채용 공고',
-        startPeriod: DateTime(2026, 10, 7),
-        endPeriod: DateTime(2026, 10, 10),
-        target: '소프트웨어 직군'),
-    Announcement(
-        title: '하이닉스 상반기 채용 공고',
-        startPeriod: DateTime(2026, 10, 8),
-        endPeriod: DateTime(2026, 10, 12),
-        target: '전자정보 직군'),
-    Announcement(
-        title: 'HD현대 상반기 채용 공고',
-        startPeriod: DateTime(2026, 10, 9),
-        endPeriod: DateTime(2026, 10, 13),
-        target: '반도체 직군')
-  ]; // 일단 공고 불러오기 내용은 임시로 메인에 적어둠 -> 나중에 분리해줄 필요 있음
+  // 유저의 개인정보 모두 불러오기
+  await UserManager.load(); // 전역변수 UserData.uds에 저장값 불러오기(window로 run하면 Documents\user_data.json으로 저장됨)
 
-  // 임시 저장 아이디 비번임
-  // 지금 자동로그인은 구현했는데 새로만든 아이디를 json파일에 저장하는 작업을 안해서 해당 아이디로만 테스트 가능해
-  UserManager.add(UserData(
-      id: 'dlwhddnjs', password: 'dlwhddnjs', name: '이종원', ancList: ancList));
-  UserManager.add(UserData(
-      id: 'dlwldnjs', password: 'dlwldnjs', name: '이지원', ancList: ancList));
 
   // 자동 로그인 값 불러오기
   final SharedPreferences prefs = await SharedPreferences.getInstance();
