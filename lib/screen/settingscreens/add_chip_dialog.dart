@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 //추가 버튼을 누를시 설정 변경 화면으로 이동
 Future<String?> showAddChipDialog(BuildContext context, String title) {
   final controller = TextEditingController();

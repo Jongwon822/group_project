@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/schedule.dart';
 
 // 근데 달력을 우리가 수정하는거면 StatefulWidget으로 가는게 더 편할지도?
@@ -74,11 +74,11 @@ class CalendarScreen extends StatelessWidget {
         );
     }
     Widget _buildHeader() {
-        return Padding(
-            padding: const EdgeInsets.fromLTRB(12, 24, 12, 20),
+        return const Padding(
+            padding: EdgeInsets.fromLTRB(12, 24, 12, 20),
             child: Column(
                 children: [
-                    const Text(
+                    Text(
                         'RECRUITMENT CALENDAR',
                         style: TextStyle(
                             fontSize: 12,
@@ -87,18 +87,18 @@ class CalendarScreen extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                         ),
                     ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Row(
                     children: [
-                        const Icon(Icons.chevron_left, size: 32, color: kNavy),
+                        Icon(Icons.chevron_left, size: 32, color: kNavy),
                         Expanded(
                             child: Text(
                                 '$year년 $month월',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: kNavy),
+                                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: kNavy),
                             ),
                         ),
-                        const Icon(Icons.chevron_right, size: 32, color: kNavy),
+                        Icon(Icons.chevron_right, size: 32, color: kNavy),
                     ],
                 ),
             ],

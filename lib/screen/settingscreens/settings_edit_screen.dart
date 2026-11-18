@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'add_chip_dialog.dart';
 import 'package:group_project/data/user_data.dart';
 import 'chip_editor.dart';
