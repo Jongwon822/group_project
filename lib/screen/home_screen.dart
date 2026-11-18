@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/editing_screen.dart';
 import 'package:group_project/screen/feedback_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:group_project/screen/anc_list.dart';
+import 'package:group_project/screen/view_all_screen.dart';
 
 
 // 이거 높이 조정할 일 있으면 주의해서 바꿔줘
@@ -64,8 +64,8 @@ class HomeScreen extends StatelessWidget {
 
                     // 탭바 이름
                     tabs: const [
-                      Tab(text: "추천 공고"),
-                      Tab(text: "추천 자격증"),
+                      Tab(text: 'Jobs'),
+                      Tab(text: 'Certs'),
                     ],
                   ),
                 ),
@@ -79,7 +79,7 @@ class HomeScreen extends StatelessWidget {
                     // 1번 탭 - 추천 공고 내용 (가로 리스트뷰 포함)
                     _buildAnnouncementTab(ud.ancList, context),
                     // 2번 탭 - 추천 자격증 내용 (아직 안만듬)
-                    const Center(child: Text("추천 자격증 화면")),
+                    _buildCertificationTab(ud.certList, context),
                     // 임시로 해둔거고 추천공고 만드는 함수처럼 추가해줘야함
                   ],
                 ),
@@ -90,9 +90,9 @@ class HomeScreen extends StatelessWidget {
               // 첨삭지원 페이지 이동 박스
               _buildContentTile(
                   Icons.description_outlined,
-                  '자소서·이력서 첨삭',
-                  'AI가 자기소개서와 이력서를 면밀하게 분석하고 직무 적합성에 딱 맞는 세련된 수정 피드백을 실시간으로 제공합니다.',
-                  '첨삭 시작하기',
+                  'Resume & Cover Letter Review',
+                  'Get instant AI feedback to tailor your resume and cover letter for your target role.',
+                  'Start Review',
                       () {
                     Navigator.push(
                       context, MaterialPageRoute(
@@ -105,9 +105,9 @@ class HomeScreen extends StatelessWidget {
               // 면접지원 페이지 이동 박스.
               _buildContentTile(
                 Icons.help_outline,
-                '면접 예상 질문 & 피드백',
-                '지원하신 직무와 이력 정보를 분석해 예상 꼬리 질문을 생성하고, 답변에 대한 종합 모의 면접 평가 점수와 개선 피드백을 전달합니다.',
-                '면접 시작하기',
+                'Interview Prep & Feedback',
+                'Practice with tailored follow-up questions based on your profile and get scored feedback.',
+                'Start Interview',
                     () {
                   Navigator.push(
                     context, MaterialPageRoute(
@@ -135,14 +135,14 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "추천 취업 공고",
+                'Recommended Jobs',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.push(
                     context, MaterialPageRoute(
-                    builder: (context) => AncDetail(ud: ud),
+                    builder: (context) => DetailScreen(ud: ud, type: 'anc'),
                   ),
                   );
                 },
@@ -152,7 +152,7 @@ class HomeScreen extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 모바일 최소 터치영역(48px) 때문에 높이 넘치는 것 방지
                 ),
                 child: const Text(
-                  "자세히 보기",
+                  'view all',
                   style: TextStyle(color: Colors.grey, fontSize: 13),
                 ),
               ),
@@ -175,10 +175,10 @@ class HomeScreen extends StatelessWidget {
                   width: MediaQuery.of(context).size.width-32,
                   height: 155,
                   alignment: Alignment.center,
-                  child: const Text('추천 공고 없음', style: TextStyle(color: Colors.grey)),
+                  child: const Text('No jobs found', style: TextStyle(color: Colors.grey)),
                 );
               } else {
-                return _buildDetailBox(
+                return _buildAncDetailBox(
                   ancList[index],
                 ); // 추천 공고 리스트로 박스를 순차적으로 생성
               }
@@ -190,7 +190,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   // 추천공고가 들어갈 박스 위젯 만드는 함수
-  Widget _buildDetailBox(Announcement anc) {
+  Widget _buildAncDetailBox(Announcement anc) {
     return Container(
       // 전체 박스 모양 잡기
       width: 270,
@@ -236,6 +236,126 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  // 추천 자격증 탭 전체 레이아웃
+  Widget _buildCertificationTab(List<Certification> certList, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 상단 타이틀 영역 (추천 자격증 / 자세히 보기)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Recommended Certs',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, MaterialPageRoute(
+                    builder: (context) => DetailScreen(ud: ud, type: 'cert'),
+                  ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 모바일 최소 터치영역(48px) 때문에 높이 넘치는 것 방지
+                ),
+                child: const Text(
+                  'view all',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 가로 스크롤로 넘기는 리스트뷰 영역
+        SizedBox(
+          height: 155,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal, // 가로로 넘기기
+            itemCount: certList.isEmpty
+                ? 1 // 비어있으면 '추천 공고 없음' 박스 하나 출력할 예정
+                : certList.length, // ancList에 저장된 공고 개수
+            padding: const EdgeInsets.only(left: 16),
+            itemBuilder: (context, index) {
+              if (certList.isEmpty) {
+                return Container(
+                  width: MediaQuery.of(context).size.width-32,
+                  height: 155,
+                  alignment: Alignment.center,
+                  child: const Text('No certification found', style: TextStyle(color: Colors.grey)),
+                );
+              } else {
+                return _buildCertDetailBox(
+                  certList[index],
+                ); // 추천 공고 리스트로 박스를 순차적으로 생성
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 추천 자격증이 들어갈 박스 위젯 만드는 함수
+  Widget _buildCertDetailBox(Certification anc) {
+    return Container(
+      // 전체 박스 모양 잡기
+      width: 270,
+      margin: const EdgeInsets.only(right: 14, bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200, width: 1.5),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        // 박스 안에 세로로 내용 배치
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            anc.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '자격증에 뭐 넣을까?',
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 24,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '자격증에 뭐 넣을까?',
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+
+
+
 
   // 첨삭하기랑 피드백하기 전용 위젯 만드는 함수
   Widget _buildContentTile(
