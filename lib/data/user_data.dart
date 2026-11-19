@@ -143,6 +143,7 @@ class UserData {
   List<Announcement> ancList;
   List<ScheduleItem> scheduleList;
   UserSettings userSettings;
+  Map<String, String> resumeList;
 
   //임시저장(앱 껐다키면 초기화 / 껐다켜도 유지되게 ?)
   // 아직 load, save에 반영되지 않은 사항임, 코드 추가 필요
@@ -156,9 +157,12 @@ class UserData {
       required this.name,
       List<Certification>? certList,
       List<Announcement>? ancList,
+      Map<String, String>? resumeList,
       List<ScheduleItem>? scheduleList,
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [],
+        certList = certList ?? [],
+        resumeList = resumeList ?? {};
         certList = certList ?? [],
         scheduleList = scheduleList ?? [];
 
@@ -169,6 +173,7 @@ class UserData {
         'name': name,
         'ancList': ancList.map((e) => e.toJson()).toList(),
         'certList': certList.map((e) => e.toJson()).toList(),
+        'resumeList': resumeList,
         'scheduleList': scheduleList.map((e) => e.toJson()).toList(),
         'userSettings': userSettings.toJson(),
       };
@@ -189,6 +194,9 @@ class UserData {
               .map((e) => Certification.fromJson(e as Map<String, dynamic>))
               .toList()
           : [],
+      resumeList: json['resumeList'] != null
+          ? Map<String, String>.from(json['resumeList'] as Map)
+          : {},
       // ---- AI 사용 코드 ----
       scheduleList: json['scheduleList'] != null
           ? (json['scheduleList'] as List)

@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/settingscreens/chip_editor.dart';
 import 'package:group_project/data/job_presets.dart';
+import 'package:group_project/data/job_recommendation.dart';
+
 class JobCategoryScreen extends StatefulWidget {
   final ValueChanged<String> login;
   final UserData ud;
@@ -11,11 +13,12 @@ class JobCategoryScreen extends StatefulWidget {
   @override
   State<JobCategoryScreen> createState() => _JobCategoryScreenState();
 }
+
 class _JobCategoryScreenState extends State<JobCategoryScreen> {
   // selectionCounter1, selectionCounter2, addCounter 삭제 → 리스트로 대체
   final List<String> _humanitiesJobs = []; // 문과 분야
-  final List<String> _scienceJobs = [];    // 이과 분야
-  final List<String> _companies = [];      // 관심 회사
+  final List<String> _scienceJobs = []; // 이과 분야
+  final List<String> _companies = []; // 관심 회사
   int pageCounter = 0;
   bool _saving = false;
 
@@ -23,20 +26,44 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
     if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v)) return;
     setState(() => target.add(v));
   }
+
 // 마지막 페이지 '저장하기'
   Future<void> _finish() async {
     if (_saving) return; // 두 번 눌림 방지
     _saving = true;
     widget.ud.userSettings = widget.ud.userSettings.copyWith(
-      firstSetting: false,             // 초기 세팅 완료
+      firstSetting: false, // 초기 세팅 완료
       humanitiesJobs: _humanitiesJobs, // 문과
-      scienceJobs: _scienceJobs,       // 이과
+      scienceJobs: _scienceJobs, // 이과
       companies: _companies,
     );
+
+    try {
+      final addedCount = await JobRecommendationService.syncRecommendedJobs(
+        widget.ud,
+        clearExisting: true,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('설정이 저장되고 맞춤 공고 $addedCount건이 갱신되었습니다.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('설정은 저장되었으나 공고 추천 중 오류가 발생했습니다.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
+    }
+
     await UserManager.save();
     if (!mounted) return;
     widget.login(widget.ud.id); // 메인 화면 진입
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,8 +174,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
             child: ElevatedButton(
               onPressed: () {
                 if (pageCounter == 2) {
-                    _finish();
-
+                  _finish();
                 } else {
                   setState(() {
                     pageCounter = pageCounter + 1;
@@ -164,13 +190,22 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 elevation: 0,
               ),
               child: pageCounter == 2
-                  ? const Text(
-                      '저장하기',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    )
+                  ? _saving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          '저장하기',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        )
                   : const Text(
                       '다음 단계로',
                       style: TextStyle(
@@ -224,7 +259,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
@@ -259,7 +294,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
@@ -323,7 +358,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                   Container(
                     padding:
-                    const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
                     decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16)),
@@ -334,7 +369,6 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                   ),
                 ],
               ),
-
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: ChipEditor(

@@ -4,9 +4,14 @@ import 'package:group_project/screen/job_category_select.dart';
 import 'package:group_project/screen/login/login_screen.dart';
 import 'package:group_project/screen/main_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
+
 
   // 내가 기록한 분야정보 불러오기
   // 나의 달력에 기록된 정보 불러오기
