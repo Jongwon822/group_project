@@ -2,7 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/schedule.dart';
 import 'package:group_project/data/schedule.dart';
 
-// 근데 달력을 우리가 수정하는거면 StatefulWidget으로 가는게 더 편할지도?
+// 달력을 StatefulWidget으로 바꾸는 구조, < > 버튼으로 달을 이동하는 기능은 AI사용함
+// 날짜 선택과 선택한 날짜의 일정 목록, D-day 계산 작성에 AI 사용함
 
 const Color kNavy = Color(0xFF243A66); //요일 줄 배경색, 연/월 글자색
 const Color kSunday = Color(0xFFB04A5A); //일요일 날짜 글자색
@@ -10,6 +11,8 @@ const Color kSaturday = Color(0xFF3F5BA9); // 토요일 날짜 글자색, 상단
 const Color kGridLine = Color(0xFFE3E6EC); // 날짜 칸 테두리 색
 const Color kOutsideBg = Color(0xFFF7F8FA); //지난달, 다음달 날짜 칸 배경색
 const Color kPageBg = Color(0xFFF5F6F8); // 화면 전체 배경색
+const Color kSelectedBg = Color(0xFFEAF0FF);
+const Color kDdayRed = Color(0xFFE5533D);
 
 //기업 그룹별 색깔
 const Map<String, Color> kCompanyColors = {
@@ -19,6 +22,9 @@ const Map<String, Color> kCompanyColors = {
 
 //기업 이름으로 색깔 찾기
 Color companyColor(String company) => kCompanyColors[company] ?? Colors.grey;
+// 두 날짜가 같은 날인지 비교 (시간은 무시하고 연/월/일만)
+bool isSameDate(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
 
 class CalendarScreen extends StatefulWidget {
     const CalendarScreen({super.key});
@@ -37,6 +43,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     ];
 
     late DateTime _focusedMonth;
+    late DateTime _selectedDay;
 
     // 처음 화면이 뜰 때 이번 달을 보여주도록 설정
     @override
@@ -44,6 +51,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         super.initState();
         final DateTime now = DateTime.now();
         _focusedMonth = DateTime(now.year, now.month, 1);
+        _selectedDay = DateTime(now.year, now.month, now.day);
     }
 
     // < > 버튼을 누르면 이전 달 또는 다음 달로 이동
@@ -52,9 +60,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
             _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + offset, 1);
         });
     }
+    // 특정 날짜의 일정만 골라내기
+    List<ScheduleItem> _eventsOf(DateTime day) {
+        return _sampleSchedules.where((s) => isSameDate(s.date, day)).toList();
+    }
+
+    // 날짜 칸을 누르면 그 날짜를 선택하고, 다른 달 날짜면 그 달로 이동
+    void _selectDay(DateTime day) {
+        setState(() {
+            _selectedDay = day;
+            if (day.month != _focusedMonth.month || day.year != _focusedMonth.year) {
+                _focusedMonth = DateTime(day.year, day.month, 1);
+            }
+        });
+    }
+
+    // 오늘 기준 D-day 글자 만들기 (D-3, D-Day, D+2)
+    String _dDayLabel(DateTime date) {
+        final DateTime now = DateTime.now();
+        final int diff = DateTime(date.year, date.month, date.day)
+            .difference(DateTime(now.year, now.month, now.day))
+            .inDays;
+        if (diff == 0) return 'D-Day';
+        return diff > 0 ? 'D-$diff' : 'D+${-diff}';
+    }
 
     @override
     Widget build(BuildContext context) {
+        final List<ScheduleItem> selectedEvents = _eventsOf(_selectedDay);
         return Container(
             width: double.infinity,
             height: double.infinity,
@@ -63,10 +96,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                             _buildCalendarCard(),
                             const SizedBox(height: 18),
                             _buildLegend(),
+                            const SizedBox(height: 22),
+                            _buildSelectedDayTitle(selectedEvents.length),
+                            const SizedBox(height: 10),
+                            if (selectedEvents.isEmpty)
+                                _buildEmptyBox()
+                            else
+                                ...selectedEvents.map(_buildScheduleCard),
                             ],
                         ),
                     ),
@@ -180,9 +221,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
     Widget _buildDayCell(DateTime day, int col) {
         final bool isOutside = day.month != _focusedMonth.month;
-        final List<ScheduleItem> events = _sampleSchedules
-            .where((s) => s.date.year == day.year && s.date.month == day.month && s.date.day == day.day)
-            .toList();
+        final bool isSelected = isSameDate(day, _selectedDay);
+        final bool isToday = isSameDate(day, DateTime.now());
+        final List<ScheduleItem> events = _eventsOf(day);
 
         //날짜 숫자 색
         Color numberColor;
@@ -196,26 +237,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
             numberColor = const Color(0xFF222222);
         }
 
-        return Container(
-            height: cellHeight,
-            padding: const EdgeInsets.fromLTRB(6, 8, 4, 4),
-            decoration: BoxDecoration(
-                color: isOutside ? kOutsideBg: Colors.white,
-                border: Border(
-                    right: col < 6 ? const BorderSide(color: kGridLine) : BorderSide.none,
-                    bottom: const BorderSide(color: kGridLine),
+        Color cellColor = Colors.white;
+        if (isSelected) {
+            cellColor = kSelectedBg;
+        } else if (isOutside) {
+            cellColor = kOutsideBg;
+        }
+
+        return GestureDetector(
+            onTap: () => _selectDay(day),
+            child: Container(
+                height: cellHeight,
+                padding: const EdgeInsets.fromLTRB(6, 8, 4, 4),
+                decoration: BoxDecoration(
+                    color: cellColor,
+                    border: Border(
+                        right: col < 6 ? const BorderSide(color: kGridLine) : BorderSide.none,
+                        bottom: const BorderSide(color: kGridLine),
+                    ),
                 ),
-            ),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                    Text('${day.day}', style: TextStyle(fontSize: 14, color: numberColor)),
-                    const SizedBox(height: 4),
-                    if (events.isNotEmpty) _buildEventChip(events.first),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Text(
+                            '${day.day}',
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: numberColor,
+                                fontWeight: (isSelected || isToday) ? FontWeight.w800 : FontWeight.w400,
+                                decoration: isToday ? TextDecoration.underline : null,
+                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (events.isNotEmpty) _buildEventChip(events.first),
+                        if (events.length > 1)
+                            Text('+${events.length - 1}', style: const TextStyle(fontSize: 9, color: Colors.grey)),
                     ],
                 ),
-            );
-        }
+            ),
+        );
+    }
 
         Widget _buildEventChip(ScheduleItem e) {
             final Color color = companyColor(e.company,);
@@ -287,4 +348,69 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ],
             );
         }
+    // 선택한 날짜 제목 그리기
+    Widget _buildSelectedDayTitle(int count) {
+        const List<String> weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+        final DateTime d = _selectedDay;
+        return Text(
+            '${d.month}월 ${d.day}일 (${weekdays[d.weekday - 1]})  ·  일정 $count개',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kNavy),
+        );
+    }
+
+    // 선택한 날짜에 일정이 없을 때 안내 상자 그리기
+    Widget _buildEmptyBox() {
+        return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: kGridLine),
+            ),
+            child: const Text(
+                '일정이 없어요.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+            ),
+        );
+    }
+
+    // 달력 아래 일정 카드 1개 그리기
+    Widget _buildScheduleCard(ScheduleItem e) {
+        final Color color = companyColor(e.company);
+        return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: kGridLine),
+            ),
+            child: Row(
+                children: [
+                    Container(
+                        width: 4,
+                        height: 36,
+                        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                                Text(e.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                                const SizedBox(height: 3),
+                                Text(e.company, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                            ],
+                        ),
+                    ),
+                    Text(
+                        _dDayLabel(e.date),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kDdayRed),
+                    ),
+                ],
+            ),
+        );
+    }
 }
