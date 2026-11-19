@@ -1,16 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'add_chip_dialog.dart';
 import 'package:group_project/data/user_data.dart';
 import 'chip_editor.dart';
 import 'package:group_project/data/job_presets.dart';
+import 'package:group_project/data/job_recommendation.dart';
+import 'dart:developer';
+
 //widget selectedChip, addChip,sectionTitle, style button들로 기존 버튼들을 몇몇 widget으로 뭉쳣습니다.
 //
-class SettingsEditScreen extends StatefulWidget{
+class SettingsEditScreen extends StatefulWidget {
   final UserData ud;
+
   const SettingsEditScreen({super.key, required this.ud});
+
   @override
   State<SettingsEditScreen> createState() => _SettingEditScreenState();
 }
+
 class _SettingEditScreenState extends State<SettingsEditScreen> {
   static const _blue = Color(0xFF1F5ADD);
   static const _lightGrey = Color(0xFFF2F3F5);
@@ -18,23 +25,27 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
   late FeedbackStyle _style;
   bool _saving = false;
   late List<String> _humanitiesJobs; // 문과
-  late List<String> _scienceJobs;    // 이과
+  late List<String> _scienceJobs; // 이과
   late List<String> _companies;
+
   void _addJob(List<String> target, String v) {
-    if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v)) return; // 문과·이과 통틀어 중복 방지
+    if (_humanitiesJobs.contains(v) || _scienceJobs.contains(v))
+      return; // 문과·이과 통틀어 중복 방지
     setState(() => target.add(v));
   }
 
   Future<void> _addCompany() async {
     final v = await showAddChipDialog(context, '관심 기업 추가');
-    if (v != null && v.isNotEmpty && !_companies.contains(v)) setState(() => _companies.add(v));
+    if (v != null && v.isNotEmpty && !_companies.contains(v))
+      setState(() => _companies.add(v));
   }
 
   void _resetJobs() {
     // jabcategory와 연결
   }
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
     final s = widget.ud.userSettings;
     _style = s.feedbackStyle;
@@ -42,9 +53,23 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
     _scienceJobs = [...s.scienceJobs];
     _companies = [...s.companies];
   }
+
   Future<void> _save() async {
     if (_saving) return;
     setState(() => _saving = true); // 두 번 누릴때, 두번 실행하는 것 을 방지합니다.
+
+    final oldSettings = widget.ud.userSettings;
+    final bool isInitialSetup = oldSettings.firstSetting;
+
+    // 1. 직군 또는 관심 기업이 실제로 변경되었는지 확인
+    final newJobs = [..._humanitiesJobs, ..._scienceJobs];
+    final bool isJobChanged =
+        !setEquals(oldSettings.jobs.toSet(), newJobs.toSet());
+    final bool isCompanyChanged =
+        !setEquals(oldSettings.companies.toSet(), _companies.toSet());
+    final bool shouldRefreshJobs =
+        isInitialSetup || isJobChanged || isCompanyChanged;
+
     widget.ud.userSettings = widget.ud.userSettings.copyWith(
       feedbackStyle: _style,
       humanitiesJobs: _humanitiesJobs,
@@ -52,9 +77,33 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
       companies: _companies,
     );
     await UserManager.save();
+
+    // 직군 또는 관심 기업이 바뀐 경우에만 AI 맞춤 공고 새로 뽑기
+    if (shouldRefreshJobs) {
+      try {
+        final addedCount = await JobRecommendationService.syncRecommendedJobs(
+          widget.ud,
+          clearExisting: true,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('맞춤 채용 공고 $addedCount건이 갱신되었습니다.')),
+          );
+        }
+      } catch (e) {
+        log('$e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('설정은 저장되었으나 공고 추천 중 오류가 발생했습니다.')),
+          );
+        }
+      }
+    }
+
     if (!mounted) return;
     Navigator.pop(context, true);
   }
+
   Widget _styleButton(FeedbackStyle f) {
     final selected = _style == f;
     return Expanded(
@@ -79,16 +128,20 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
       ),
     );
   }
+
   Widget _sectionTitle(String title, {int? count, Widget? trailing}) {
     return Row(
       children: [
-        Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        Text(title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         if (count != null) ...[
           const SizedBox(width: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(color: _lightGrey, borderRadius: BorderRadius.circular(10)),
-            child: Text('$count', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            decoration: BoxDecoration(
+                color: _lightGrey, borderRadius: BorderRadius.circular(10)),
+            child: Text('$count',
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ),
         ],
         const Spacer(),
@@ -96,6 +149,7 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
       ],
     );
   }
+
   Widget _addChip(VoidCallback onTap) {
     return ActionChip(
       label: const Text('+ 추가'),
@@ -106,11 +160,13 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
       onPressed: onTap,
     );
   }
+
   Widget _selectedChip(String text, VoidCallback onRemove) {
     return InputChip(
       avatar: const Icon(Icons.check, size: 16, color: _blue),
       label: Text(text),
-      labelStyle: const TextStyle(color: _blue, fontSize: 13, fontWeight: FontWeight.w600),
+      labelStyle: const TextStyle(
+          color: _blue, fontSize: 13, fontWeight: FontWeight.w600),
       backgroundColor: Colors.white,
       side: const BorderSide(color: _blue),
       shape: const StadiumBorder(),
@@ -119,9 +175,9 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
       onDeleted: onRemove,
     );
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -131,7 +187,8 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('설정 변경', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: const Text('설정 변경',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -146,7 +203,6 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
             _styleButton(FeedbackStyle.strict),
           ]),
           const SizedBox(height: 32),
-
           _sectionTitle(
             '관심 직군',
             count: _humanitiesJobs.length + _scienceJobs.length,
@@ -177,15 +233,13 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
             onRemove: (v) => setState(() => _scienceJobs.remove(v)),
           ),
           const SizedBox(height: 32),
-
           _sectionTitle('관심 기업'),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final c in _companies) _selectedChip(c, () => setState(() => _companies.remove(c))),
+            for (final c in _companies)
+              _selectedChip(c, () => setState(() => _companies.remove(c))),
             _addChip(_addCompany),
           ]),
-
-
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -198,14 +252,27 @@ class _SettingEditScreenState extends State<SettingsEditScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: _blue,
                 side: const BorderSide(color: _blue),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('저장', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: _blue,
+                      ),
+                    )
+                  : const Text(
+                      '저장',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
         ),
       ),
     );
   }
-
 }

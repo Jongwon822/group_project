@@ -141,6 +141,7 @@ class UserData {
   List<Certification> certList;
   List<Announcement> ancList;
   UserSettings userSettings;
+  Map<String, String> resumeList;
 
   //임시저장(앱 껐다키면 초기화 / 껐다켜도 유지되게 ?)
   // 아직 load, save에 반영되지 않은 사항임, 코드 추가 필요
@@ -154,9 +155,11 @@ class UserData {
       required this.name,
       List<Certification>? certList,
       List<Announcement>? ancList,
+      Map<String, String>? resumeList,
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [],
-        certList = certList ?? [];
+        certList = certList ?? [],
+        resumeList = resumeList ?? {};
 
   // Map으로 변환
   Map<String, dynamic> toJson() => {
@@ -165,6 +168,7 @@ class UserData {
         'name': name,
         'ancList': ancList.map((e) => e.toJson()).toList(),
         'certList': certList.map((e) => e.toJson()).toList(),
+        'resumeList': resumeList,
         'userSettings': userSettings.toJson(),
       };
 
@@ -184,6 +188,9 @@ class UserData {
               .map((e) => Certification.fromJson(e as Map<String, dynamic>))
               .toList()
           : [],
+      resumeList: json['resumeList'] != null
+          ? Map<String, String>.from(json['resumeList'] as Map)
+          : {},
       userSettings: json['userSettings'] != null
           ? UserSettings.fromJson(json['userSettings'])
           : const UserSettings(), // json에 값이 없어도 기본값으로
