@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/schedule.dart';
+import 'package:group_project/data/schedule.dart';
 
 // 근데 달력을 우리가 수정하는거면 StatefulWidget으로 가는게 더 편할지도?
 
@@ -19,12 +20,14 @@ const Map<String, Color> kCompanyColors = {
 //기업 이름으로 색깔 찾기
 Color companyColor(String company) => kCompanyColors[company] ?? Colors.grey;
 
-class CalendarScreen extends StatelessWidget {
-    //TODO: 사용자마다 일정을 따로 저장하기 위해 로그인한 사용자 id를 받을 예정
+class CalendarScreen extends StatefulWidget {
     const CalendarScreen({super.key});
 
-    static const int year = 2026; //화면에 보여줄 연도
-    static const int month = 9; // 화면에 보여줄 달
+    @override
+    State<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends State<CalendarScreen> {
     static const double cellHeight = 68;
 
     //TODO: 이 예시 데이터 대신 ScheduleStorage로 '이 사용자'의 일정을 불러올 예정
@@ -32,6 +35,23 @@ class CalendarScreen extends StatelessWidget {
         ScheduleItem(id: '1', title: '삼성전자 서류 마감', company: '삼성', date: DateTime(2026, 9, 12)),
         ScheduleItem(id: '2', title: 'LG전자 1차 면접', company: 'LG그룹', date: DateTime(2026, 9, 20)),
     ];
+
+    late DateTime _focusedMonth;
+
+    // 처음 화면이 뜰 때 이번 달을 보여주도록 설정
+    @override
+    void initState() {
+        super.initState();
+        final DateTime now = DateTime.now();
+        _focusedMonth = DateTime(now.year, now.month, 1);
+    }
+
+    // < > 버튼을 누르면 이전 달 또는 다음 달로 이동
+    void _changeMonth(int offset) {
+        setState(() {
+            _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + offset, 1);
+        });
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -74,11 +94,11 @@ class CalendarScreen extends StatelessWidget {
         );
     }
     Widget _buildHeader() {
-        return const Padding(
-            padding: EdgeInsets.fromLTRB(12, 24, 12, 20),
+        return Padding(
+            padding: const EdgeInsets.fromLTRB(12, 24, 12, 20),
             child: Column(
                 children: [
-                    Text(
+                    const Text(
                         'RECRUITMENT CALENDAR',
                         style: TextStyle(
                             fontSize: 12,
@@ -87,18 +107,24 @@ class CalendarScreen extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                         ),
                     ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                     children: [
-                        Icon(Icons.chevron_left, size: 32, color: kNavy),
+                        IconButton(
+                            onPressed: () => _changeMonth(-1),
+                            icon: const Icon(Icons.chevron_left, size: 32, color: kNavy),
+                        ),
                         Expanded(
                             child: Text(
-                                '$year년 $month월',
+                                '${_focusedMonth.year}년 ${_focusedMonth.month}월',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: kNavy),
+                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: kNavy),
                             ),
                         ),
-                        Icon(Icons.chevron_right, size: 32, color: kNavy),
+                        IconButton(
+                            onPressed: () => _changeMonth(1),
+                            icon: const Icon(Icons.chevron_right, size: 32, color: kNavy),
+                        ),
                     ],
                 ),
             ],
@@ -131,6 +157,8 @@ class CalendarScreen extends StatelessWidget {
         );
     }
     Widget _buildDateGrid() {
+        final int year = _focusedMonth.year;
+        final int month = _focusedMonth.month;
         final DateTime firstDay = DateTime(year, month, 1);
         final int leadingDays = firstDay.weekday % 7;
         final int daysInMonth = DateTime(year, month + 1, 0).day;
@@ -151,7 +179,7 @@ class CalendarScreen extends StatelessWidget {
         );
     }
     Widget _buildDayCell(DateTime day, int col) {
-        final bool isOutside = day.month != month;
+        final bool isOutside = day.month != _focusedMonth.month;
         final List<ScheduleItem> events = _sampleSchedules
             .where((s) => s.date.year == day.year && s.date.month == day.month && s.date.day == day.day)
             .toList();
@@ -231,7 +259,7 @@ class CalendarScreen extends StatelessWidget {
                             ),
                         ),
                         Text(
-                            '$year. ${month.toString().padLeft(2, '0')} 기준',
+                            '${_focusedMonth.year}. ${_focusedMonth.month.toString().padLeft(2, '0')} 기준',
                             style: const TextStyle(fontSize: 11, color: Color(0xFFA0A6B0)),
                         ),
                     ],
