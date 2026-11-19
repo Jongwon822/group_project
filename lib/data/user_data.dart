@@ -162,8 +162,7 @@ class UserData {
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [],
         certList = certList ?? [],
-        resumeList = resumeList ?? {};
-        certList = certList ?? [],
+        resumeList = resumeList ?? {},
         scheduleList = scheduleList ?? [];
 
   // Map으로 변환
