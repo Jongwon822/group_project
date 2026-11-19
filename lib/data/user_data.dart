@@ -189,11 +189,6 @@ class UserData {
               .map((e) => Certification.fromJson(e as Map<String, dynamic>))
               .toList()
           : [],
-      scheduleList: json['scheduleList'] != null
-          ? (json['scheduleList'] as List)
-              .map((e) => ScheduleItem.fromJson(e as Map<String, dynamic>))
-              .toList()
-          : [], // 예전에 저장된 파일에 일정이 없어도 빈 목록으로
       // ---- AI 사용 코드 ----
       scheduleList: json['scheduleList'] != null
           ? (json['scheduleList'] as List)
