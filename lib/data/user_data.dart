@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'dart:developer';
+import 'package:group_project/data/schedule.dart';
 
 enum FeedbackStyle {
   soft('부드럽게', '격려하는 어조로, 좋은 점을 먼저 짚어 주세요.'),
@@ -140,6 +141,7 @@ class UserData {
   final String name;
   List<Certification> certList;
   List<Announcement> ancList;
+  List<ScheduleItem> scheduleList;
   UserSettings userSettings;
 
   //임시저장(앱 껐다키면 초기화 / 껐다켜도 유지되게 ?)
@@ -154,9 +156,11 @@ class UserData {
       required this.name,
       List<Certification>? certList,
       List<Announcement>? ancList,
+      List<ScheduleItem>? scheduleList,
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [],
-        certList = certList ?? [];
+        certList = certList ?? [],
+        scheduleList = scheduleList ?? [];
 
   // Map으로 변환
   Map<String, dynamic> toJson() => {
@@ -165,6 +169,7 @@ class UserData {
         'name': name,
         'ancList': ancList.map((e) => e.toJson()).toList(),
         'certList': certList.map((e) => e.toJson()).toList(),
+        'scheduleList': scheduleList.map((e) => e.toJson()).toList(),
         'userSettings': userSettings.toJson(),
       };
 
@@ -184,6 +189,11 @@ class UserData {
               .map((e) => Certification.fromJson(e as Map<String, dynamic>))
               .toList()
           : [],
+      scheduleList: json['scheduleList'] != null
+          ? (json['scheduleList'] as List)
+              .map((e) => ScheduleItem.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : [], // 예전에 저장된 파일에 일정이 없어도 빈 목록으로
       userSettings: json['userSettings'] != null
           ? UserSettings.fromJson(json['userSettings'])
           : const UserSettings(), // json에 값이 없어도 기본값으로
