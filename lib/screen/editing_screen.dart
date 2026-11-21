@@ -3,16 +3,15 @@ import 'package:group_project/data/user_data.dart';
 import 'package:group_project/data/open_router.dart';
 
 /* 임시로 만든 open_router로 AI사용하게 만들어놨음
-디자인 및 세부사항은 수정해줄것
+디자인 및 세부사항은 수정해줄것 -> 해봄
+
 자소서 입력과 첨삭결과 출력 모두 글씨크기에 비해 칸이 너무 작음
-애초에 홈화면처럼 스크롤뷰로 묶거나 입력과 출력의 페이지를 다르게 하는 방식이 필요해 보임
-자소서 첨삭할 때 입력할 프롬프트도 정해놔야할듯
+애초에 홈화면처럼 스크롤뷰로 묶거나 입력과 출력의 페이지를 다르게 하는 방식이 필요해 보임 -> 두페이지로 나눔
 
+자소서 첨삭할 때 입력할 프롬프트도 정해놔야할듯 -> 이건나중에
 
-자소서 삭제 기능도 넣어야 할 듯
+자소서 삭제 기능도 넣어야 할 듯 -> db먼저 구현하고함
 위치는 설정?
-
-일단나중에함
 
 */
 
@@ -28,11 +27,12 @@ class _EditingScreenState extends State<EditingScreen> {
   final TextEditingController _textController1 = TextEditingController(); // 입력
   late final List<String> _itemList;
   String? _selectedJob;
-  // 이거 리스트는 나중에 ud.userSettings에 저장된 관심직군으로 하면 될듯
 
   final TextEditingController _textController2 = TextEditingController(); // 출력
 
   bool _isReviewLoading = false; // 첨삭 로딩 상태
+
+  int _resetCount = 0; //첨삭요청 로딩중 초기화 시 결과창 등장 방지
 
   //임시저장
   @override
@@ -70,6 +70,7 @@ class _EditingScreenState extends State<EditingScreen> {
 
   //전체 초기화
   void resetAll() {
+    _resetCount++;
     _textController1.clear();
     _textController2.clear();
 
@@ -85,7 +86,7 @@ class _EditingScreenState extends State<EditingScreen> {
   Widget build(BuildContext context) {
     final isAnyLoading = _isReviewLoading; // loading이 안끝났으면 버튼 작동 X
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade100,
         appBar: AppBar(
           backgroundColor: Colors.white,
           scrolledUnderElevation: 0,
@@ -110,227 +111,199 @@ class _EditingScreenState extends State<EditingScreen> {
         ),
         body: LayoutBuilder(//입력칸 높이 자동 조절
             builder: (context, c) {
-              return SingleChildScrollView(
-                child: SizedBox(
-                  height: c.maxHeight < 600 ? 600 : c.maxHeight,
-                  //칸 일정 이상 작아지면 더이상 안작아지고 스크롤
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "지원 직무",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        //AI활용
-                        DropdownMenu<String>(
-                          initialSelection: _selectedJob,
-                          //관심직군이 있을때만 enable
-                          enabled: _itemList.isNotEmpty,
-                          //관심직군이 비었을 때 안내 문구
-                          hintText: _itemList.isEmpty ? '설정에서 관심 직군을 추가해 주세요' : null,
-                          expandedInsets: EdgeInsets.zero,
-                          // 가로 꽉 채우기
-                          requestFocusOnTap: false,
-                          // 키보드 입력 막고 선택만 가능하게
-                          menuStyle: const MenuStyle(
-                            backgroundColor: WidgetStatePropertyAll(Colors.white),
-                            //surfaceTintColor: WidgetStatePropertyAll(Colors.transparent), // 보라빛 틴트 제거
-                          ),
-                          inputDecorationTheme: InputDecorationTheme(
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+          return SingleChildScrollView(
+            child: SizedBox(
+              height: c.maxHeight < 280 ? 280 : c.maxHeight,
+              //칸 일정 이상 작아지면 더이상 안작아지고 스크롤
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey.shade200),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text(
+                            "지원 직무",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          dropdownMenuEntries: _itemList
-                          //.where((item) => item != _selectedJob) // 선택된 항목 제외
-                              .map((String item) {
-                            return DropdownMenuEntry<String>(
-                                value: item, label: item);
-                          }).toList(),
-                          onSelected: (String? newValue) {
-                            if (newValue == null) return;
-
-                            setState(() {
-                              _selectedJob = newValue;
-                            });
-                            widget.ud.draftJob = newValue; //선택한 직군 임시저장
-                          },
-                        ),
-                        //-------------------------------------------
-
-                        const SizedBox(height: 20),
-
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: TextField(
-                              controller: _textController1,
-                              maxLines: null,
-                              expands: true,
-                              keyboardType: TextInputType.multiline,
-                              textAlignVertical: TextAlignVertical.top,
-                              decoration: const InputDecoration(
-                                hintText: "자소서 문항과 내용을 붙여넣으세요",
-                                hintStyle: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 18,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(14),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            //AI활용
+                            child: DropdownMenu<String>(
+                              initialSelection: _selectedJob,
+                              textAlign: TextAlign.right,
+                              //관심직군이 있을때만 enable
+                              enabled: _itemList.isNotEmpty,
+                              //관심직군이 비었을 때 안내 문구
+                              hintText: _itemList.isEmpty
+                                  ? '설정에서 관심 직군을 추가해 주세요'
+                                  : null,
+                              expandedInsets: EdgeInsets.zero,
+                              // 가로 꽉 채우기
+                              requestFocusOnTap: false,
+                              // 키보드 입력 막고 선택만 가능하게
+                              menuStyle: const MenuStyle(
+                                backgroundColor:
+                                    WidgetStatePropertyAll(Colors.white),
+                                //surfaceTintColor: WidgetStatePropertyAll(Colors.transparent), // 보라빛 틴트 제거
                               ),
-                            ),
-                          ),
-                        ),
+                              inputDecorationTheme: const InputDecorationTheme(
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                                border: InputBorder.none,
+                              ),
+                              dropdownMenuEntries: _itemList
+                                  //.where((item) => item != _selectedJob) // 선택된 항목 제외
+                                  .map((String item) {
+                                return DropdownMenuEntry<String>(
+                                    value: item, label: item);
+                              }).toList(),
+                              onSelected: (String? newValue) {
+                                if (newValue == null) return;
 
-                        const SizedBox(height: 20),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                isAnyLoading ? null : _requestReview();
+                                setState(() {
+                                  _selectedJob = newValue;
+                                });
+                                widget.ud.draftJob = newValue; //선택한 직군 임시저장
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4F46E5),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ), //request feedback
-                              child: isAnyLoading
-                                  ? const SizedBox(
-                                // 로딩 중 표시
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                                  : const Text(
-                                "첨삭 요청",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        const Text(
-                          "AI 첨삭 결과",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Expanded(
-                          child: Container(
-                            height: 150,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: TextField(
-                              controller: _textController2,
-                              maxLines: null,
-                              expands: true,
-                              keyboardType: TextInputType.multiline,
-                              textAlignVertical: TextAlignVertical.top,
-                              decoration: const InputDecoration(
-                                hintText: "결과 출력",
-                                hintStyle: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 18,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(14),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                          '자기소개서',
+                           style: TextStyle(
+                             fontSize: 16,
+                             fontWeight: FontWeight.bold,
+                           ),
+                         )
+                        ),
+                        // 이미 받은 결과가 있을 때만 버튼을 표시한다.
+                        if (_textController2.text.trim().isNotEmpty)
+                          Transform.translate(
+                            offset: const Offset(0, 4), // 오른쪽으로 0, 아래로 4
+                            child: TextButton(
+                              onPressed: isAnyLoading
+                                  ? null
+                                  : () {
+                                Navigator.of(context).push<void>(
+                                  MaterialPageRoute<void>(builder: _buildReviewResult),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.grey.shade700,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
                               ),
+                              child: const Text('이전 결과 보기'),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                              onPressed: isAnyLoading ? null : _saveResume,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF4F46E5),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                /*side: const BorderSide(
-                              color: Color(0xFF3B82F6),
-                              width: 1.0,
-                            ),*/
-                              ), //request feedback
-                              child: const Text(
-                                "자소서 저장하기",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        //전체초기화
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                              onPressed: resetAll,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFEEF2FF),
-                                foregroundColor: const Color(0xFF4F46E5),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                /*side: const BorderSide(
-                              color: Color(0xFF3B82F6),
-                              width: 1.0,
-                            ),*/
-                              ), //request feedback
-                              child: const Text(
-                                "전체 내용 초기화",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF4F46E5)),
-                              )),
-                        ),
                       ],
                     ),
+
+                    const SizedBox(height: 8),
+
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey.shade200),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextField(
+                          controller: _textController1,
+                          maxLines: null,
+                          expands: true,
+                          keyboardType: TextInputType.multiline,
+                          textAlignVertical: TextAlignVertical.top,
+                          decoration: const InputDecoration(
+                            hintText: "자소서 문항과 내용을 붙여넣으세요",
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 18,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(14),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Colors.grey.shade200),),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: resetAll,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.grey.shade700,
+                      elevation: 0,
+                      minimumSize: const Size(0, 54),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: Colors.grey.shade200),
+                      ),
+                    ),
+                    child: const Text('전체 초기화', textAlign: TextAlign.center),
                   ),
                 ),
-              );
-            }));
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: isAnyLoading ? null : _requestReview,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4F46E5),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size(0, 54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    // 로딩 표시도 아이콘 없이 글자로 보여준다.
+                    child: Text(isAnyLoading ? '첨삭 중…' : '첨삭 요청'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // ------ AI 코드 사용 ------
@@ -350,6 +323,8 @@ class _EditingScreenState extends State<EditingScreen> {
       return;
     }
 
+    final resetCount = _resetCount; //로딩과정에서 초기화해 _resetCount 변경시 결과창 안열림
+
     setState(() => _isReviewLoading = true);
 
     try {
@@ -360,9 +335,16 @@ class _EditingScreenState extends State<EditingScreen> {
         prompt: '지원 직무: $_selectedJob\n\n[자기소개서 내용]\n$essay',
       );
 
-      setState(() {
-        _textController2.text = result; // 리스너를 통해 draftResult에도 자동 저장됨
-      });
+      //_resetCount확인
+      if (!mounted || resetCount != _resetCount) {
+        return;
+      }
+
+      _textController2.text = result; // 리스너를 통해 draftResult에도 자동 저장됨
+
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(builder: _buildReviewResult),
+      );
     } catch (e) {
       _showSnackBar('첨삭 요청 중 오류가 발생했습니다. 다시 시도해 주세요.');
     } finally {
@@ -370,6 +352,85 @@ class _EditingScreenState extends State<EditingScreen> {
         setState(() => _isReviewLoading = false);
       }
     }
+  }
+
+  //첨삭결과화면
+  Widget _buildReviewResult(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade100,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        title: const Text(
+          'AI 첨삭 결과',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: SizedBox.expand(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white, // 결과 칸 배경
+                border: Border.all(color: Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextField(
+                controller: _textController2,
+                maxLines: null,
+                expands: true,
+                readOnly: true,
+                showCursor: true,
+                canRequestFocus: true,
+                enableInteractiveSelection: true,
+                textAlignVertical: TextAlignVertical.top,
+                decoration: const InputDecoration(
+                  hintText: '결과 출력',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(14),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Colors.grey.shade200), // 본문과 하단 영역의 구분선
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: _saveResume,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4F46E5),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '자소서 저장하기',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _saveResume() async {
