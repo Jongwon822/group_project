@@ -13,8 +13,11 @@ dependencies:
   http: ^1.6.0
   intl: ^0.20.3
   material_ui: ^1.11.1
+  path: ^1.9.1
   path_provider: ^2.1.6
   shared_preferences: ^2.5.5
+  sqflite: ^2.4.6
+  sqflite_common_ffi: ^2.4.7
   table_calendar: ^3.3.0
 
 dev_dependencies:
