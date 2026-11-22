@@ -22,7 +22,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // BottomNavigationBar로 보여줄 화면 리스트
   late final List<Widget> _pages = [
     HomeScreen(ud: widget.ud), // 분리한 상단 탭바 + 리스트뷰 화면
-    CalendarScreen(), // 달력 화면 (calendar_screen.dart)
+    CalendarScreen(ud: widget.ud), // 달력 화면
     SettingScreen(ud: widget.ud, logout: widget.logout), // 임시 설정 화면 (로그아웃 기능만 대충 만들어둠) 디자인은 다시 해줄 것
   ];
 

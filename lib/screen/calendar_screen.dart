@@ -1,9 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/schedule.dart';
-import 'package:group_project/data/schedule.dart';
+import 'package:group_project/data/user_data.dart';
+import 'package:group_project/screen/add_schedule_screen.dart';
 
 // 달력을 StatefulWidget으로 바꾸는 구조, < > 버튼으로 달을 이동하는 기능은 AI사용함
 // 날짜 선택과 선택한 날짜의 일정 목록, D-day 계산 작성에 AI 사용함
+// 버튼으로 일정 추가 화면 이동 후 사용자 데이터에 저장하는 기능 작성에 AI 사용
 
 const Color kNavy = Color(0xFF243A66); //요일 줄 배경색, 연/월 글자색
 const Color kSunday = Color(0xFFB04A5A); //일요일 날짜 글자색
@@ -18,6 +20,7 @@ const Color kDdayRed = Color(0xFFE5533D);
 const Map<String, Color> kCompanyColors = {
     '삼성': Color(0xFF3F5BA9),
     'LG그룹': Color(0xFF8A2E45),
+    '기타': Color(0xFF6B7280),
 };
 
 //기업 이름으로 색깔 찾기
@@ -27,7 +30,8 @@ bool isSameDate(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
 class CalendarScreen extends StatefulWidget {
-    const CalendarScreen({super.key});
+    final UserData ud;
+    const CalendarScreen({super.key, required this.ud});
 
     @override
     State<CalendarScreen> createState() => _CalendarScreenState();
@@ -35,12 +39,6 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
     static const double cellHeight = 68;
-
-    //TODO: 이 예시 데이터 대신 ScheduleStorage로 '이 사용자'의 일정을 불러올 예정
-    static final List<ScheduleItem> _sampleSchedules = [
-        ScheduleItem(id: '1', title: '삼성전자 서류 마감', company: '삼성', date: DateTime(2026, 9, 12)),
-        ScheduleItem(id: '2', title: 'LG전자 1차 면접', company: 'LG그룹', date: DateTime(2026, 9, 20)),
-    ];
 
     late DateTime _focusedMonth;
     late DateTime _selectedDay;
@@ -62,7 +60,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
     // 특정 날짜의 일정만 골라내기
     List<ScheduleItem> _eventsOf(DateTime day) {
-        return _sampleSchedules.where((s) => isSameDate(s.date, day)).toList();
+        return widget.ud.scheduleList.where((s) => isSameDate(s.date, day)).toList();
     }
 
     // 날짜 칸을 누르면 그 날짜를 선택하고, 다른 달 날짜면 그 달로 이동
@@ -75,6 +73,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
         });
     }
 
+    // + 버튼을 누르면 일정 추가 화면으로 이동하고, 저장해서 돌아오면 내 일정에 추가
+    Future<void> _openAddScreen() async {
+        final ScheduleItem? newItem = await Navigator.push<ScheduleItem>(
+            context,
+            MaterialPageRoute(builder: (_) => AddScheduleScreen(initialDate: _selectedDay)),
+        );
+        if (newItem == null) return;
+        widget.ud.scheduleList.add(newItem);
+        await UserManager.save();
+        if (!mounted) return;
+        setState(() {
+            _selectedDay = newItem.date;
+            _focusedMonth = DateTime(newItem.date.year, newItem.date.month, 1);
+        });
+    }
     // 오늘 기준 D-day 글자 만들기 (D-3, D-Day, D+2)
     String _dDayLabel(DateTime date) {
         final DateTime now = DateTime.now();
@@ -85,16 +98,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
         return diff > 0 ? 'D-$diff' : 'D+${-diff}';
     }
 
+    // 달력 카드, 범례, 선택한 날짜의 일정 목록, + 버튼으로 이루어진 화면 전체 그리기
     @override
     Widget build(BuildContext context) {
         final List<ScheduleItem> selectedEvents = _eventsOf(_selectedDay);
-        return Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: kPageBg,
-            child: SafeArea(
+
+        return Scaffold(
+            backgroundColor: kPageBg,
+            body: SafeArea(
                 child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -108,17 +121,25 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 _buildEmptyBox()
                             else
                                 ...selectedEvents.map(_buildScheduleCard),
-                            ],
-                        ),
+                        ],
                     ),
                 ),
-            );
-        }
+            ),
+            floatingActionButton: FloatingActionButton(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                shape: const CircleBorder(),
+                onPressed: _openAddScreen,
+                child: const Icon(Icons.add),
+            ),
+        );
+    }
+
     Widget _buildCalendarCard() {
         return Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-                color:Colors.white,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: const [
                     BoxShadow(color: Color(0x14000000), blurRadius: 20, offset: Offset(0, 6)),
@@ -134,6 +155,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
         );
     }
+
     Widget _buildHeader() {
         return Padding(
             padding: const EdgeInsets.fromLTRB(12, 24, 12, 20),
