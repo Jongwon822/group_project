@@ -151,6 +151,11 @@ class UserData {
   String draftEssay = '';
   String draftResult = '';
 
+  //---------------------------------------------------------------------------
+  String? draftResultEssay; // 현재 첨삭 결과를 만들 때 쓴 원문
+  String? draftResultJob; // 현재 첨삭 결과를 만들 때 선택한 직무
+  //-------------------------------------------------------------------------
+
   UserData(
       {required this.id,
       required this.password,

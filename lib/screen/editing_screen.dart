@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/data/open_router.dart';
 
+import 'package:group_project/data/resume_database.dart';
+
 /* 임시로 만든 open_router로 AI사용하게 만들어놨음
 디자인 및 세부사항은 수정해줄것 -> 해봄
 
@@ -14,6 +16,8 @@ import 'package:group_project/data/open_router.dart';
 위치는 설정?
 
 */
+
+//db관련기능, 직군선택, 창 넘어가는 구조 AI활용, 그 외에는 코드에 표시
 
 class EditingScreen extends StatefulWidget {
   final UserData ud; // 나중에 AI 답변 출력할 때 프롬프트에 사용할 세팅 값을 ud로 가져오는 방식으로 만들어줘
@@ -73,6 +77,10 @@ class _EditingScreenState extends State<EditingScreen> {
     _resetCount++;
     _textController1.clear();
     _textController2.clear();
+
+    // 첨삭 결과를 비울 때 그 결과에 연결된 원문과 직무도 비운다.
+    widget.ud.draftResultEssay = null;
+    widget.ud.draftResultJob = null;
 
     final defaultJob = _itemList.isEmpty ? null : _itemList.first;
     widget.ud.draftJob = defaultJob ?? '';
@@ -202,7 +210,7 @@ class _EditingScreenState extends State<EditingScreen> {
                                   ? null
                                   : () {
                                 Navigator.of(context).push<void>(
-                                  MaterialPageRoute<void>(builder: _buildReviewResult),
+                                  MaterialPageRoute<void>(builder: _editResult),
                                 );
                               },
                               style: TextButton.styleFrom(
@@ -323,6 +331,7 @@ class _EditingScreenState extends State<EditingScreen> {
       return;
     }
 
+    final job = _selectedJob; //db용
     final resetCount = _resetCount; //로딩과정에서 초기화해 _resetCount 변경시 결과창 안열림
 
     setState(() => _isReviewLoading = true);
@@ -332,7 +341,7 @@ class _EditingScreenState extends State<EditingScreen> {
       final result = await OpenRouterService.sendPrompt(
         systemPrompt: '당신은 채용 담당자 출신의 자기소개서 첨삭 전문가입니다. $stylePrompt '
             '지원 직무에 맞춰 문맥, 논리력, 직무 적합성을 분석하고 수정 제안을 제공하세요.',
-        prompt: '지원 직무: $_selectedJob\n\n[자기소개서 내용]\n$essay',
+        prompt: '지원 직무: $job\n\n[자기소개서 내용]\n$essay',
       );
 
       //_resetCount확인
@@ -340,10 +349,14 @@ class _EditingScreenState extends State<EditingScreen> {
         return;
       }
 
+      // 이전 결과 보기에서 저장할 때도 이 결과에 맞는 원문과 직무를 사용
+      widget.ud.draftResultEssay = essay;
+      widget.ud.draftResultJob = job;
+
       _textController2.text = result; // 리스너를 통해 draftResult에도 자동 저장됨
 
       Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: _buildReviewResult),
+        MaterialPageRoute<void>(builder: _editResult),
       );
     } catch (e) {
       _showSnackBar('첨삭 요청 중 오류가 발생했습니다. 다시 시도해 주세요.');
@@ -355,7 +368,7 @@ class _EditingScreenState extends State<EditingScreen> {
   }
 
   //첨삭결과화면
-  Widget _buildReviewResult(BuildContext context) {
+  Widget _editResult(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -433,10 +446,21 @@ class _EditingScreenState extends State<EditingScreen> {
     );
   }
 
+  //AI활용
   Future<void> _saveResume() async {
     final content = _textController2.text.trim();
     if (content.isEmpty) {
       _showSnackBar('저장할 자소서 내용을 먼저 입력해 주세요.');
+      return;
+    }
+
+    // 저장 창을 띄우기 전에 현재 결과와 짝이 되는 원문과 직무를 읽어 둔다.
+    final originalText = widget.ud.draftResultEssay;
+    final job = widget.ud.draftResultJob;
+
+    //원문 정보가 없ㅅㅅ으면 첨삭 재요청
+    if (originalText == null) {
+      _showSnackBar('원문을 함께 저장하려면 첨삭을 다시 요청해 주세요.');
       return;
     }
 
@@ -497,16 +521,25 @@ class _EditingScreenState extends State<EditingScreen> {
     // 취소를 눌렀거나 이름을 입력하지 않은 경우 종료
     if (resumeName == null || resumeName.isEmpty) return;
 
-    final bool isOverwrite = widget.ud.resumeList.containsKey(resumeName);
+    //신규저장인지 덮어쓰기인지 확인
+    try {
+      final isOverwrite = await ResumeDatabase.saveResume(
+        userId: widget.ud.id,
+        title: resumeName,
+        job: job,
+        originalText: originalText,
+        editedText: content,
+      );
 
-    // Map<String, String>에 ('이름', '내용') 저장 후 파일 반영
-    widget.ud.resumeList[resumeName] = content;
-    await UserManager.save();
-
-    _showSnackBar(
-      isOverwrite
-          ? "'$resumeName' 자소서를 덮어썼습니다."
-          : "'$resumeName' 자소서가 저장되었습니다.",
-    );
+      _showSnackBar(
+        isOverwrite
+            ? "'$resumeName' 자소서를 덮어썼습니다."
+            : "'$resumeName' 자소서가 저장되었습니다.",
+      );
+    } catch (_) {
+      _showSnackBar('자소서를 저장하지 못했습니다. 다시 시도해 주세요.');
+    }
   }
+
+
 }
