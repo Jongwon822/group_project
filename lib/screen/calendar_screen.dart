@@ -3,9 +3,10 @@ import 'package:group_project/data/schedule.dart';
 import 'package:group_project/data/user_data.dart';
 import 'package:group_project/screen/add_schedule_screen.dart';
 
-// 달력을 StatefulWidget으로 바꾸는 구조, < > 버튼으로 달을 이동하는 기능은 AI사용함
-// 날짜 선택과 선택한 날짜의 일정 목록, D-day 계산 작성에 AI 사용함
-// 버튼으로 일정 추가 화면 이동 후 사용자 데이터에 저장하는 기능 작성에 AI 사용
+// 달력을 StatefulWidget으로 바꾸는 구조, < > 버튼으로 달을 이동하는 기능(_changeMonth)
+// 날짜 선택(_selectDay)과 선택한 날짜의 일정 목록, D-day 계산,
+// + 버튼으로 일정 추가 화면 이동 후 사용자 데이터에 저장하는 기능(_openAddScreen),
+// 일정 카드를 길게 눌러 삭제하는 기능(_confirmDelete) 작성에 AI(Claude) 사용
 
 const Color kNavy = Color(0xFF243A66); //요일 줄 배경색, 연/월 글자색
 const Color kSunday = Color(0xFFB04A5A); //일요일 날짜 글자색
@@ -88,6 +89,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
             _focusedMonth = DateTime(newItem.date.year, newItem.date.month, 1);
         });
     }
+    // 일정 카드를 길게 누르면 확인 창을 띄우고, 삭제를 누르면 내 일정에서 지우기
+    Future<void> _confirmDelete(ScheduleItem e) async {
+        final bool? ok = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                title: const Text('일정 삭제'),
+                content: Text('"${e.title}" 일정을 삭제할까요?'),
+                actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('취소'),
+                    ),
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('삭제', style: TextStyle(color: Colors.red)),
+                    ),
+                ],
+            ),
+        );
+        if (ok != true) return;
+        widget.ud.scheduleList.removeWhere((s) => s.id == e.id);
+        await UserManager.save();
+        if (!mounted) return;
+        setState(() {});
+    }
+
     // 오늘 기준 D-day 글자 만들기 (D-3, D-Day, D+2)
     String _dDayLabel(DateTime date) {
         final DateTime now = DateTime.now();
@@ -401,37 +428,40 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // 달력 아래 일정 카드 1개 그리기
     Widget _buildScheduleCard(ScheduleItem e) {
         final Color color = companyColor(e.company);
-        return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: kGridLine),
-            ),
-            child: Row(
-                children: [
-                    Container(
-                        width: 4,
-                        height: 36,
-                        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                                Text(e.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                                const SizedBox(height: 3),
-                                Text(e.company, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                            ],
+        return GestureDetector(
+            onLongPress: () => _confirmDelete(e),
+            child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: kGridLine),
+                ),
+                child: Row(
+                    children: [
+                        Container(
+                            width: 4,
+                            height: 36,
+                            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
                         ),
-                    ),
-                    Text(
-                        _dDayLabel(e.date),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kDdayRed),
-                    ),
-                ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    Text(e.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                                    const SizedBox(height: 3),
+                                    Text(e.company, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                ],
+                            ),
+                        ),
+                        Text(
+                            _dDayLabel(e.date),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kDdayRed),
+                        ),
+                    ],
+                ),
             ),
         );
     }
