@@ -208,6 +208,8 @@ class HomeScreen extends StatelessWidget {
         children: [
           Text(
             anc.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,
@@ -217,6 +219,8 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '${DateFormat('MM/dd').format(anc.startPeriod)}~${DateFormat('MM/dd').format(anc.endPeriod)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 24,
@@ -226,6 +230,8 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             anc.target,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Colors.grey,
               fontSize: 13,

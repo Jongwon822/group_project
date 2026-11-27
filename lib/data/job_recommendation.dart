@@ -31,14 +31,14 @@ class _RawJobPosting {
     final now = DateTime.now();
     return _RawJobPosting(
       id: json['JO_REQST_NO']?.toString() ?? '',
-      company: json['CMPNY_NM']?.toString() ?? '기업명 미상',
-      title: json['JO_SJ']?.toString() ?? '제목 없음',
+      company: json['CMPNY_NM']?.toString() ?? 'Unknown Company',
+      title: json['JO_SJ']?.toString() ?? 'Untitled',
       jobCategory: json['HOPE_JSSFC_CMMN_CODE_SE_NM']?.toString() ??
           json['JOBCODE_NM']?.toString() ??
-          '직무 무관',
+          'Any Role',
       career: json['CAREER_CND_CMMN_CODE_SE_NM']?.toString() ??
           json['CAREER_CND_NM']?.toString() ??
-          '경력 무관',
+          'Any Experience',
       startPeriod: _parseDate(
         json['JO_REG_DT']?.toString() ?? json['REG_DT']?.toString(),
         fallback: now,
@@ -56,10 +56,10 @@ class _RawJobPosting {
     final now = DateTime.now();
     return _RawJobPosting(
       id: 'remotive_${json['id'] ?? now.millisecondsSinceEpoch}',
-      company: json['company_name']?.toString() ?? '기업명 미상',
-      title: json['title']?.toString() ?? '제목 없음',
-      jobCategory: json['category']?.toString() ?? '직무 무관',
-      career: '경력 무관',
+      company: json['company_name']?.toString() ?? 'Unknown Company',
+      title: json['title']?.toString() ?? 'Untitled',
+      jobCategory: json['category']?.toString() ?? 'Any Role',
+      career: 'Any Experience',
       startPeriod: _parseDate(json['publication_date']?.toString(), fallback: now),
       endPeriod: now.add(const Duration(days: 30)),
     );
@@ -170,20 +170,20 @@ class JobRecommendationService {
 
     // (2) OpenRouter 프롬프트 구성
     const systemPrompt = '''
-당신은 채용 공고 매칭 어시스턴트입니다.
-사용자의 관심 직군과 관심 기업에 부합하는 채용 공고를 골라 해당 공고의 "id" 값만 JSON 문자열 배열로 반환하세요.
-규칙:
-1. 반드시 ["id1", "id2"] 형태의 순수 JSON 배열만 출력하세요.
-2. 마크다운 코드블록(```), 인사말, 부가 설명을 절대 포함하지 마세요.
-3. 조건에 맞는 공고가 없다면 빈 배열 [] 을 반환하세요.
+You are a job posting matching assistant.
+Select the job postings that match the user's target job roles and target companies, and return only the "id" values of those postings as a JSON array of strings.
+Rules:
+1. Output strictly a raw JSON array in the format ["id1", "id2"].
+2. Do not include Markdown code blocks (```), greetings, or additional explanations under any circumstances.
+3. If no postings match the criteria, return an empty array [].
 ''';
 
     final userPrompt = '''
-[사용자 설정]
-- 관심 직군: ${targetJobs.isEmpty ? '제한 없음 (전체 직군 중 주요 공고 5개 선택)' : targetJobs.join(', ')}
-- 관심 기업: ${targetCompanies.isEmpty ? '지정 없음' : targetCompanies.join(', ')}
+[User Preferences]
+- Target Job Roles: ${targetJobs.isEmpty ? 'No restrictions (Select top 5 key postings across all roles)' : targetJobs.join(', ')}
+- Target Companies: ${targetCompanies.isEmpty ? 'Not specified' : targetCompanies.join(', ')}
 
-[채용 공고 목록]
+[Job Postings List]
 ${jsonEncode(rawJobs.map((j) => j.toSummaryMap()).toList())}
 ''';
 

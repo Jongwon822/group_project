@@ -60,12 +60,12 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
                   findCheck == false
                       ? widget.selection == 'id'
                           ? _finder(
-                              '이메일 찾기', '이메일을 찾기 위한 개인정보를 입력하세요', '비밀번호를 입력하세요')
-                          : _finder('비밀번호 찾기', '비밀번호를 찾기 위한 개인정보를 입력하세요',
-                              '이메일을 입력하세요')
+                              'Find Email', 'Enter your information to find your email', 'Enter your password')
+                          : _finder('Find Password', 'Enter your information to find your password',
+                              'Enter your email')
                       : widget.selection == 'id'
-                          ? _output('이메일 찾기', output)
-                          : _output('비밀번호 찾기', output)
+                          ? _output('Find Email', output)
+                          : _output('Find Password', output)
                 ],
               ),
             ),
@@ -121,7 +121,7 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
           child: TextField(
             controller: _text1,
             decoration: const InputDecoration(
-              hintText: '이름을 입력하세요',
+              hintText: 'Enter your name',
               border: InputBorder.none,
             ),
           ),
@@ -155,7 +155,7 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
                   _text1.text, _text2.text, widget.selection);
               if (userOutput == null) {
                 setState(() {
-                  errorMessage = '일치하는 계정이 존재하지 않습니다';
+                  errorMessage = 'No matching account found.';
                 });
               } else {
                 output = userOutput;
@@ -172,7 +172,7 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
               ),
             ),
             child: const Text(
-              '찾기',
+              'Find',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

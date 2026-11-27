@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const Text(
-                    '로그인',
+                    'Login',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 50),
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextField(
                       controller: _email,
                       decoration: const InputDecoration(
-                        hintText: '이메일을 입력하세요',
+                        hintText: 'Enter your email',
                         border: InputBorder.none,
                       ),
                     ),
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextField(
                       controller: _password,
                       decoration: const InputDecoration(
-                        hintText: '비밀번호를 입력하세요',
+                        hintText: 'Enter your password',
                         border: InputBorder.none,
                       ),
                     ),
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                         ),
-                        const Text('자동 로그인')
+                        const Text('Keep me signed in')
                       ],
                     ),
                   ),
@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       child: const Text(
-                        '계속',
+                        'Continue',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: EdgeInsets.zero,
                               ),
                               child: const Text(
-                                "이메일 찾기",
+                                "Forgot email?",
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 13,
@@ -186,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: EdgeInsets.zero,
                         ),
                         child: const Text(
-                          "비밀번호 찾기",
+                          "Forget password?",
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 13,
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: EdgeInsets.zero,
                               ),
                               child: const Text(
-                                "회원가입",
+                                "Register",
                                 style: TextStyle(
                                   color: Color(0xFF4F46E5),
                                   fontSize: 13,
@@ -295,10 +295,10 @@ class _LoginScreenState extends State<LoginScreen> {
     UserData? ud = UserManager.uds.where((ud) => ud.id == _email.text).firstOrNull;
 
     if (ud == null) {
-      return '이메일이 일치하지 않습니다.';
+      return 'No account found with this email.';
     }
     if (ud.password != _password.text) {
-      return '비밀번호가 일치하지 않습니다.';
+      return 'Incorrect password.';
     }
     return '';
   }

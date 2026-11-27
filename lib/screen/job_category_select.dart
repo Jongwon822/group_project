@@ -30,7 +30,12 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
 // 마지막 페이지 '저장하기'
   Future<void> _finish() async {
     if (_saving) return; // 두 번 눌림 방지
-    _saving = true;
+
+    // 로딩바 보여주기 위한 화면 새로고침
+    setState(() {
+      _saving = true;
+    });
+
     widget.ud.userSettings = widget.ud.userSettings.copyWith(
       firstSetting: false, // 초기 세팅 완료
       humanitiesJobs: _humanitiesJobs, // 문과
@@ -46,12 +51,12 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('설정이 저장되고 맞춤 공고 $addedCount건이 갱신되었습니다.')),
+        SnackBar(content: Text('Settings saved, and $addedCount personalized ${addedCount == 1 ? 'job has' : 'jobs have'} been updated.')),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('설정은 저장되었으나 공고 추천 중 오류가 발생했습니다.')),
+        const SnackBar(content: Text('Settings saved, but an error occurred while updating job recommendations.')),
       );
     } finally {
       if (mounted) {
@@ -69,7 +74,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '시작하기 전',
+          'Before We Start',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
@@ -156,11 +161,10 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
               style: const TextStyle(fontSize: 13, color: Colors.black),
               children: [
                 if (pageCounter == 1) ...[
-                  const TextSpan(text: '현재 '),
                   TextSpan(
-                      text: '${_humanitiesJobs.length + _scienceJobs.length}개',
+                      text: '${_humanitiesJobs.length + _scienceJobs.length}',
                       style: const TextStyle(color: Color(0xFF3B82F6))),
-                  const TextSpan(text: ' 선택됨')
+                  const TextSpan(text: ' selected')
                 ]
               ],
             ),
@@ -200,14 +204,14 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                           ),
                         )
                       : const Text(
-                          '저장하기',
+                          'Save',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white),
                         )
                   : const Text(
-                      '다음 단계로',
+                      'Continue',
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -230,7 +234,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: const Text(
-            '직군을 선택해주세요',
+            'Select Job Categories',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
           ),
         ),
@@ -238,7 +242,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: const Text(
-            '관심 있는 직군을 선택하시면 맞춤형 채용 정보와 맞춤 커리어를 추천해 드릴게요. (다중 선택 가능)',
+            "Select job categories you're interested in to get personalized job openings and career recommendations. (Multiple selections allowed)",
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -251,7 +255,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
               Row(
                 children: [
                   const Text(
-                    '문과 분야',
+                    'Non-Tech Fields',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
@@ -277,7 +281,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 child: ChipEditor(
                   items: _humanitiesJobs,
                   options: humanitiesJobPresets,
-                  dialogTitle: '문과 직군 추가',
+                  dialogTitle: 'Add Non-Tech Roles',
                   onAdd: (v) => _addJob(_humanitiesJobs, v),
                   onRemove: (v) => setState(() => _humanitiesJobs.remove(v)),
                 ),
@@ -286,7 +290,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
               Row(
                 children: [
                   const Text(
-                    '이과 분야',
+                    'STEM Fields',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
@@ -310,7 +314,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 child: ChipEditor(
                   items: _scienceJobs,
                   options: scienceJobPresets,
-                  dialogTitle: '이과 직군 추가',
+                  dialogTitle: 'Add STEM Roles',
                   onAdd: (v) => _addJob(_scienceJobs, v),
                   onRemove: (v) => setState(() => _scienceJobs.remove(v)),
                 ),
@@ -329,7 +333,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: const Text(
-            '관심 회사를 작성해주세요',
+            'Enter a company name',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
           ),
         ),
@@ -337,7 +341,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: const Text(
-            '관심 있는 회사를 선택하시면 맞춤형 채용 정보와 맞춤 커리어를 추천해 드릴게요. (다중 추가 가능)',
+            "Enter companies you're interested in to get personalized job openings and career recommendations. (Multiple selections allowed)",
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -350,7 +354,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
               Row(
                 children: [
                   const Text(
-                    '관심 회사',
+                    'Favorite Company',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
@@ -373,7 +377,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: ChipEditor(
                   items: _companies,
-                  dialogTitle: '관심 회사 추가',
+                  dialogTitle: 'Add Favorite Company',
                   onAdd: (v) => setState(() => _companies.add(v)),
                   onRemove: (v) => setState(() => _companies.remove(v)),
                 ),
@@ -385,6 +389,8 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
     );
   }
 
+  // to do
+  // 사용자 정보 입력란 내용 추가 필요
   Widget _userInformation() {
     return Column(
       children: [
@@ -392,7 +398,7 @@ class _JobCategoryScreenState extends State<JobCategoryScreen> {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: const Text(
-            '사용자 정보를 입력해주세요',
+            'Set up your profile',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
           ),
         ),

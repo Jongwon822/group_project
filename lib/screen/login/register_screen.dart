@@ -57,11 +57,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 50),
                   const Text(
-                    '계정 만들기',
+                    'Create Account',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const Text(
-                    '이 앱에 가입하려면 이메일을 입력하세요',
+                    'Enter your email to sign up for this app',
                     style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
@@ -79,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: TextField(
                       controller: _name,
                       decoration: const InputDecoration(
-                        hintText: '이름을 입력하세요',
+                        hintText: 'Enter your name',
                         border: InputBorder.none,
                       ),
                     ),
@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: TextField(
                       controller: _email,
                       decoration: const InputDecoration(
-                        hintText: '이메일을 입력하세요',
+                        hintText: 'Enter your email',
                         border: InputBorder.none,
                       ),
                     ),
@@ -113,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: TextField(
                       controller: _password1,
                       decoration: const InputDecoration(
-                        hintText: '비밀번호를 입력하세요',
+                        hintText: 'Enter your password',
                         border: InputBorder.none,
                       ),
                     ),
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: TextField(
                       controller: _password2,
                       decoration: const InputDecoration(
-                        hintText: '비밀번호 확인',
+                        hintText: 'Confirm password',
                         border: InputBorder.none,
                       ),
                     ),
@@ -159,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       child: const Text(
-                        '계속',
+                        'Continue',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -203,25 +203,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         RegExp(r'^[^@\s]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$');
 
     if (name.isEmpty) {
-      return '이름 입력이 누락되었습니다.';
+      return 'Please enter your name.';
     }
     if (email.isEmpty) {
-      return '이메일 입력이 누락되었습니다.';
+      return 'Please enter your email.';
     }
     if (email.contains(' ')) {
-      return '이메일에 공백이 포함되어 있습니다.';
+      return 'Email cannot contain spaces.';
     }
     if (!emailCheck.hasMatch(email)) {
-      return '이메일은 email@domain.com 형식입니다.';
+      return 'Please enter a valid email (e.g., email@domain.com).';
     }
     if (password1.isEmpty || password2.isEmpty) {
-      return '비밀번호 입력이 누락되었습니다.';
+      return 'Please enter your password.';
     }
     if (password1.contains(' ') || password2.contains(' ')) {
-      return '비밀번호에 공백이 포함되어 있습니다.';
+      return 'Password cannot contain spaces.';
     }
     if (password1 != password2) {
-      return '비밀번호가 일치하지 않습니다.';
+      return 'Passwords do not match.';
     }
     return '';
   }
