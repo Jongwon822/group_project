@@ -142,6 +142,7 @@ class UserData {
   List<Certification> certList;
   List<Announcement> ancList;
   List<ScheduleItem> scheduleList;
+  Map<String, int> companyColors;  // 기업 이름별 일정 색
   UserSettings userSettings;
   Map<String, String> resumeList;
 
@@ -164,12 +165,13 @@ class UserData {
       List<Announcement>? ancList,
       Map<String, String>? resumeList,
       List<ScheduleItem>? scheduleList,
+      Map<String, int>? companyColors,
       this.userSettings = const UserSettings()})
       : ancList = ancList ?? [],
         certList = certList ?? [],
         resumeList = resumeList ?? {},
-        scheduleList = scheduleList ?? [];
-
+        scheduleList = scheduleList ?? [],
+        companyColors = companyColors ?? {};
   // Map으로 변환
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -179,6 +181,7 @@ class UserData {
         'certList': certList.map((e) => e.toJson()).toList(),
         'resumeList': resumeList,
         'scheduleList': scheduleList.map((e) => e.toJson()).toList(),
+        'companyColors': companyColors,
         'userSettings': userSettings.toJson(),
       };
 
@@ -208,6 +211,8 @@ class UserData {
               .toList()
           : [],
       // --------------------
+      companyColors: (json['companyColors'] as Map<String, dynamic>?)
+          ?.map((key, value) => MapEntry(key, value as int)),
       userSettings: json['userSettings'] != null
           ? UserSettings.fromJson(json['userSettings'])
           : const UserSettings(), // json에 값이 없어도 기본값으로
