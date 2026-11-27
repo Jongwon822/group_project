@@ -393,7 +393,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ],
                     Container(width: 1, height: 14, color: kGridLine),
                     const SizedBox(width: 18),
-                    const Text('월간 보기', style: TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
                 ],
             );
         }
