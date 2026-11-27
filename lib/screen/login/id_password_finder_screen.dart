@@ -18,6 +18,7 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
   String errorMessage = '';
   String output = '';
   bool findCheck = false;
+  bool _isLoading = false;
 
   // 사용이 끝난 컨트롤러는 dispose()
   @override
@@ -60,8 +61,12 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
                   findCheck == false
                       ? widget.selection == 'id'
                           ? _finder(
-                              'Find Email', 'Enter your information to find your email', 'Enter your password')
-                          : _finder('Find Password', 'Enter your information to find your password',
+                              'Find Email',
+                              'Enter your information to find your email',
+                              'Enter your password')
+                          : _finder(
+                              'Find Password',
+                              'Enter your information to find your password',
                               'Enter your email')
                       : widget.selection == 'id'
                           ? _output('Find Email', output)
@@ -92,7 +97,10 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
             border: Border.all(color: Colors.grey),
           ),
           alignment: Alignment.center,
-          child: Text(output, style: const TextStyle(fontSize: 18),)),
+          child: Text(
+            output,
+            style: const TextStyle(fontSize: 18),
+          )),
     ]);
   }
 
@@ -150,20 +158,42 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
           width: 300,
           height: 48,
           child: ElevatedButton(
-            onPressed: () async {
-              String? userOutput = await _isUserExits(
-                  _text1.text, _text2.text, widget.selection);
-              if (userOutput == null) {
-                setState(() {
-                  errorMessage = 'No matching account found.';
-                });
-              } else {
-                output = userOutput;
-                setState(() {
-                  findCheck = true;
-                });
-              }
-            },
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    setState(() {
+                      _isLoading = true;
+                      errorMessage = '';
+                    });
+
+                    try {
+                      String? userOutput = await _isUserExits(
+                          _text1.text.trim(),
+                          _text2.text.trim(),
+                          widget.selection);
+                      if (!mounted) return;
+
+                      if (userOutput == null) {
+                        setState(() {
+                          _isLoading = false;
+                          errorMessage = 'No matching account found.';
+                        });
+                      } else {
+                        output = userOutput;
+                        setState(() {
+                          _isLoading = false;
+                          findCheck = true;
+                        });
+                      }
+                    } catch (e) {
+                      if (!mounted) return;
+                      setState(() {
+                        _isLoading = false;
+                        errorMessage =
+                            'Failed to connect to server. Please try again.';
+                      });
+                    }
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               elevation: 0,
@@ -171,14 +201,23 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Find',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    'Find',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
           ),
         ),
         const SizedBox(
@@ -196,6 +235,7 @@ class _PasswordFinderScreenState extends State<PasswordFinderScreen> {
 
   Future<String?> _isUserExits(
       String text1, String text2, String target) async {
+    await UserManager.load();
     if (target == 'id') {
       UserData? ud = UserManager.uds
           .where((ud) => ud.name == text1 && ud.password == text2)

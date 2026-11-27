@@ -2,7 +2,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/user_data.dart';
 
 class RegisterScreen extends StatefulWidget {
-
   const RegisterScreen({super.key});
 
   @override
@@ -17,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _password2 = TextEditingController();
 
   String errorMessage = '';
+  bool _isLoading = false;
 
   // 사용이 끝난 컨트롤러는 dispose()
   @override
@@ -38,8 +38,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onPressed: () {
               Navigator.pop(context); //되돌아가기
             },
-            icon: const Icon(Icons.arrow_back, size: 30,)
-        ),
+            icon: const Icon(
+              Icons.arrow_back,
+              size: 30,
+            )),
       ),
       body: SafeArea(
         child: Column(
@@ -142,15 +144,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: 300,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          errorMessage = _inputCheck();
-                        });
-                        // _inputCheck에서 오류가 없었다면 로그인창으로 넘어감
-                        if (_inputCheck() == '') {
-                          _registerSuccess(context);
-                        }
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              final String validationError = _inputCheck();
+                              setState(() {
+                                errorMessage = validationError;
+                              });
+                              // _inputCheck에서 오류가 없었다면 로그인창으로 넘어감
+                              if (validationError == '') {
+                                await _registerSuccess(context);
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         elevation: 0,
@@ -158,14 +163,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Continue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(
@@ -191,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String email = _email.text;
     String password1 = _password1.text;
     String password2 = _password2.text;
-    String name = _name.text;
+    String name = _name.text.trim();
 
     // AI 코드 활용
     // ^[^@\s] : @와 공백을 제외한 문자가 1자 이상 필수
@@ -227,10 +241,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // 회원가입 완료 하면 작동할 함수
-  void _registerSuccess(BuildContext context) {
+  Future<void> _registerSuccess(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+      errorMessage = '';
+    });
+    try {
+      final bool isAdded = await UserManager.add(
+        UserData(
+          id: _email.text.trim(),
+          password: _password1.text,
+          name: _name.text.trim(),
+        ),
+      );
 
-    UserManager.add(UserData(id: _email.text, password: _password1.text, name: _name.text)); // 리스트에 저장
-    // 방금 입력한 _email, _password1을 ud.json 파일에 저장하는 기능 필요
-    Navigator.pop(context);
+      if (!mounted) return;
+
+      if (!isAdded) {
+        setState(() {
+          _isLoading = false;
+          errorMessage = 'This email is already registered.';
+        });
+        return;
+      }
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        errorMessage = 'Registration failed. Please try again.';
+      });
+    }
   }
 }

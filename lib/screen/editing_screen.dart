@@ -94,31 +94,31 @@ class _EditingScreenState extends State<EditingScreen> {
   Widget build(BuildContext context) {
     final isAnyLoading = _isReviewLoading; // loading이 안끝났으면 버튼 작동 X
     return Scaffold(
-        backgroundColor: Colors.grey.shade100,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          scrolledUnderElevation: 0,
-          // 이거 해줘야 스크롤 내렸을 때 앱바 색상 안변함
-          leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context); //되돌아가기
-              },
-              icon: const Icon(
-                Icons.arrow_back,
-                size: 30,
-              )),
+      backgroundColor: Colors.grey.shade100,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        // 이거 해줘야 스크롤 내렸을 때 앱바 색상 안변함
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context); //되돌아가기
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              size: 30,
+            )),
 
-          title: const Text(
-            "자소서 첨삭",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+        title: const Text(
+          "자소서 첨삭",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          centerTitle: true,
         ),
-        body: LayoutBuilder(//입력칸 높이 자동 조절
-            builder: (context, c) {
+        centerTitle: true,
+      ),
+      body: LayoutBuilder(//입력칸 높이 자동 조절
+        builder: (context, c) {
           return SingleChildScrollView(
             child: SizedBox(
               height: c.maxHeight < 280 ? 280 : c.maxHeight,
@@ -162,7 +162,7 @@ class _EditingScreenState extends State<EditingScreen> {
                               // 키보드 입력 막고 선택만 가능하게
                               menuStyle: const MenuStyle(
                                 backgroundColor:
-                                    WidgetStatePropertyAll(Colors.white),
+                                WidgetStatePropertyAll(Colors.white),
                                 //surfaceTintColor: WidgetStatePropertyAll(Colors.transparent), // 보라빛 틴트 제거
                               ),
                               inputDecorationTheme: const InputDecorationTheme(
@@ -171,7 +171,7 @@ class _EditingScreenState extends State<EditingScreen> {
                                 border: InputBorder.none,
                               ),
                               dropdownMenuEntries: _itemList
-                                  //.where((item) => item != _selectedJob) // 선택된 항목 제외
+                              //.where((item) => item != _selectedJob) // 선택된 항목 제외
                                   .map((String item) {
                                 return DropdownMenuEntry<String>(
                                     value: item, label: item);
@@ -193,13 +193,13 @@ class _EditingScreenState extends State<EditingScreen> {
                     Row(
                       children: [
                         const Expanded(
-                          child: Text(
-                          '자기소개서',
-                           style: TextStyle(
-                             fontSize: 16,
-                             fontWeight: FontWeight.bold,
-                           ),
-                         )
+                            child: Text(
+                              '자기소개서',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
                         ),
                         // 이미 받은 결과가 있을 때만 버튼을 표시한다.
                         if (_textController2.text.trim().isNotEmpty)

@@ -4,7 +4,6 @@ import 'package:group_project/screen/login/register_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:group_project/screen/login/id_password_finder_screen.dart';
 
-
 // 비밀번호 찾기 기능 미완성, 다이어로그로 할지 고민중
 
 class LoginScreen extends StatefulWidget {
@@ -17,12 +16,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   // TextField()에 적힌 값을 사용하기 위한 컨트롤러 생성
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   bool autoLogin = false;
   String errorMessage = '';
+  bool _isLoading = false;
 
   // 사용이 끝난 컨트롤러는 dispose()
   @override
@@ -114,16 +113,38 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 300,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          errorMessage = _loginCheck();
-                        });
-                        // 계속 누르면 작동할 함수
-                        if (_loginCheck()=='') {
-                          _savedAutoLogin(autoLogin); // 자동로그인 여부를 prefs에 저장
-                          widget.login(_email.text); // 로그인 성공한 ud로 메인 진입
-                        }
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _isLoading = true;
+                                errorMessage = '';
+                              });
+                              final String checkResult = await _loginCheck();
+                              if (!mounted) return;
+
+                              if (checkResult == '') {
+                                // 로그인 성공 시 새 세션 발급 및 Firestore 반영
+                                final matchedUser = UserManager.uds.firstWhere(
+                                  (u) => u.id == _email.text.trim(),
+                                );
+                                await UserManager.activateSessionForUser(
+                                    matchedUser);
+                                await _savedAutoLogin(autoLogin);
+
+                                if (!mounted) return;
+                                setState(() {
+                                  _isLoading = false;
+                                  errorMessage = '';
+                                });
+                                widget.login(matchedUser.id);
+                              } else {
+                                setState(() {
+                                  _isLoading = false;
+                                  errorMessage = checkResult;
+                                });
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         elevation: 0,
@@ -131,14 +152,23 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Continue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Continue',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -242,14 +272,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
   // 회원가입 창 넘어갔다가 다시 돌아올 때 에러 메세지랑 입력 내용 지우는 함수
   Future<void> _OpenRegister() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            const RegisterScreen(),
+        builder: (context) => const RegisterScreen(),
       ),
     );
     if (mounted) {
@@ -266,8 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-        PasswordFinderScreen(selection: selection),
+        builder: (context) => PasswordFinderScreen(selection: selection),
       ),
     );
     if (mounted) {
@@ -279,20 +306,28 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-
   // 로그인 했을 때 autoLogin이 true라면
-  void _savedAutoLogin(bool autoLogin) async {
+  Future<void> _savedAutoLogin(bool autoLogin) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (autoLogin) {
-      prefs.setString('id', _email.text);
-      prefs.setBool('autoLogin', true);
+      await prefs.setString('id', _email.text);
+      await prefs.setBool('autoLogin', true);
+    } else {
+      await prefs.setBool('autoLogin', false);
+      await prefs.remove('id');
     }
   }
 
+  Future<String> _loginCheck() async {
+    try {
+      await UserManager.load();
+    } catch (e) {
+      return 'Failed to connect to server. Please try again.';
+    }
 
-  String _loginCheck() {
-
-    UserData? ud = UserManager.uds.where((ud) => ud.id == _email.text).firstOrNull;
+    final String inputEmail = _email.text.trim();
+    UserData? ud =
+        UserManager.uds.where((ud) => ud.id == inputEmail).firstOrNull;
 
     if (ud == null) {
       return 'No account found with this email.';
