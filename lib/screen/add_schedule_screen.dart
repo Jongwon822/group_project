@@ -1,13 +1,25 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:group_project/data/schedule.dart';
 import 'package:group_project/screen/calendar_screen.dart';
+// 기업 색으로 고를 수 있는 색 6개
+const List<int> kColorPalette = [
+  0xFFE5533D,
+  0xFFF59E0B,
+  0xFF16A34A,
+  0xFF2563EB,
+  0xFF7C3AED,
+  0xFFDB2777,
+];
 
 // 제목 입력, 기업 선택, 날짜 선택, 저장 버튼에서 AI 사용함
+// 기업 이름 입력과 색 선택, 기존 기업 색 자동 선택,
 // 날짜 선택 팝업, 저장 후 달력 화면으로 값 돌려주기 작성에 AI 사용함
 
 class AddScheduleScreen extends StatefulWidget {
     final DateTime initialDate;
-    const AddScheduleScreen({super.key, required this.initialDate});
+    // 달력 화면의 UserData에 있는 것을 그대로 받음
+    final Map<String, int> companyColors;
+    const AddScheduleScreen({super.key, required this.initialDate, required this.companyColors});
 
     @override
     State<AddScheduleScreen> createState() => _AddScheduleScreenState();
@@ -15,7 +27,10 @@ class AddScheduleScreen extends StatefulWidget {
 
 class _AddScheduleScreenState extends State<AddScheduleScreen> {
     final TextEditingController _titleController = TextEditingController();
-    String _company = kCompanyColors.keys.first;
+    // 기업 이름 입력칸
+    final _companyController = TextEditingController();
+    // 지금 선택된 색
+    int _colorValue = kColorPalette.first;
     late DateTime _date;
 
     // 달력에서 선택해 둔 날짜를 기본 날짜로 설정
@@ -29,6 +44,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     @override
     void dispose() {
         _titleController.dispose();
+        _companyController.dispose();
         super.dispose();
     }
 
@@ -43,18 +59,28 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         if (picked == null) return;
         setState(() => _date = picked);
     }
-
-    // 입력한 내용으로 새 일정을 만들어 달력 화면에 돌려주기
-    void _save() {
-        final ScheduleItem item = ScheduleItem(
-            id: DateTime.now().microsecondsSinceEpoch.toString(),
-            title: _titleController.text.trim(),
-            company: _company,
-            date: DateTime(_date.year, _date.month, _date.day),
-        );
-        Navigator.pop(context, item);
+    // 이미 색이 정해진 기업이면 그 색을 자동으로 선택
+    void _onCompanyChanged(String text) {
+      final saved = widget.companyColors[text.trim()];
+        if (saved != null) {
+          setState(() => _colorValue = saved);
+        }
     }
 
+    // 입력한 내용으로 새 일정을 만들어 달력 화면에 돌려주기
+      void _save() {
+        final company = _companyController.text.trim();
+        if (company.isNotEmpty) {
+          widget.companyColors[company] = _colorValue;
+        }
+        final ScheduleItem item = ScheduleItem(
+          id: DateTime.now().microsecondsSinceEpoch.toString(),
+          title: _titleController.text.trim(),
+          company: company,
+          date: DateTime(_date.year, _date.month, _date.day),
+        );
+        Navigator.pop(context, item);
+      }
     // 제목 입력, 기업 선택, 날짜 선택, 저장 버튼으로 이루어진 화면 그리기
     @override
     Widget build(BuildContext context) {
@@ -94,18 +120,19 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
                             const Text('기업 그룹', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 8),
-                            Wrap(
-                                spacing: 8,
-                                children: [
-                                    for (final entry in kCompanyColors.entries)
-                                        ChoiceChip(
-                                            label: Text(entry.key),
-                                            selected: _company == entry.key,
-                                            selectedColor: entry.value.withAlpha(40),
-                                            onSelected: (_) => setState(() => _company = entry.key),
-                                        ),
-                                ],
+                            TextField(
+                              controller: _companyController,
+                              onChanged: _onCompanyChanged,
+                              decoration: const InputDecoration(
+                                labelText: 'Company',
+                                hintText: 'e.g. Samsung, Naver',
+                                border: OutlineInputBorder(),
+                              ),
                             ),
+                            const SizedBox(height: 16),
+                            const Text('Color'),
+                            const SizedBox(height: 8),
+                            _buildColorPicker(),
                             const SizedBox(height: 24),
 
                             const Text('날짜', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
@@ -150,4 +177,31 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             ),
         );
     }
+  // 기업 색 선택 동그라미 줄
+  Widget _buildColorPicker() {
+    return Wrap(
+      spacing: 12,
+      children: kColorPalette.map((value) {
+        final selected = value == _colorValue;
+        return GestureDetector(
+          onTap: () => setState(() => _colorValue = value),
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Color(value),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: selected ? Colors.black : Colors.transparent,
+                width: 3,
+              ),
+            ),
+            child: selected
+                ? const Icon(Icons.check, size: 18, color: Colors.white)
+                : null,
+          ),
+        );
+      }).toList(),
+    );
+  }
 }

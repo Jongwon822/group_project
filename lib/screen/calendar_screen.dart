@@ -78,7 +78,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     Future<void> _openAddScreen() async {
         final ScheduleItem? newItem = await Navigator.push<ScheduleItem>(
             context,
-            MaterialPageRoute(builder: (_) => AddScheduleScreen(initialDate: _selectedDay)),
+            MaterialPageRoute(builder: (_) => AddScheduleScreen(
+                                                initialDate: _selectedDay,
+                                                companyColors: widget.ud.companyColors,
+                                              ),
+                                              ),
         );
         if (newItem == null) return;
         widget.ud.scheduleList.add(newItem);
